@@ -1,9 +1,8 @@
 
+import { useNavigate } from 'react-router-dom';
 import { Product } from '@/store/productStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ShoppingCart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -11,8 +10,17 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, index }: ProductCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/product/${product.id}`);
+  };
+
   return (
-    <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 animate-slide-up gradient-card">
+    <Card 
+      className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 animate-slide-up gradient-card cursor-pointer"
+      onClick={handleClick}
+    >
       <div 
         className="relative overflow-hidden bg-nike-light-gray aspect-square"
         style={{ animationDelay: `${index * 100}ms` }}
@@ -36,7 +44,7 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
           <h3 className="font-bold text-xl text-nike-dark group-hover:text-nike-orange transition-colors duration-300">
             {product.name}
           </h3>
-          <p className="text-nike-gray text-sm leading-relaxed">
+          <p className="text-nike-gray text-sm leading-relaxed line-clamp-2">
             {product.description}
           </p>
         </div>
@@ -45,13 +53,9 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
           <span className="text-2xl font-bold text-nike-dark">
             ${product.price}
           </span>
-          <Button 
-            size="sm" 
-            className="bg-nike-orange hover:bg-nike-orange/90 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-          >
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            Add to Cart
-          </Button>
+          <span className="text-sm text-nike-gray font-medium px-3 py-1 bg-nike-light-gray rounded-full">
+            View Details
+          </span>
         </div>
       </CardContent>
     </Card>
