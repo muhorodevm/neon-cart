@@ -36,17 +36,6 @@ const mockBanners: Banner[] = [
     textColor: 'text-white',
     dismissible: true,
     priority: 2
-  },
-  {
-    id: '3',
-    type: 'announcement',
-    title: 'New Air Jordan Collection Now Available',
-    description: 'Explore the latest designs',
-    backgroundColor: 'bg-gradient-to-r from-nike-dark to-nike-gray',
-    textColor: 'text-white',
-    link: '/men',
-    dismissible: false,
-    priority: 3
   }
 ];
 
@@ -59,10 +48,11 @@ const BannerManager = () => {
     const dismissed = JSON.parse(localStorage.getItem('dismissedBanners') || '[]');
     setDismissedBanners(dismissed);
     
-    // Filter and sort banners
+    // Filter and sort banners - limit to 1 banner at a time for better responsiveness
     const activeBanners = mockBanners
       .filter(banner => !dismissed.includes(banner.id))
-      .sort((a, b) => a.priority - b.priority);
+      .sort((a, b) => a.priority - b.priority)
+      .slice(0, 1); // Only show one banner at a time
     
     setBanners(activeBanners);
   }, []);
@@ -83,39 +73,38 @@ const BannerManager = () => {
   if (banners.length === 0) return null;
 
   return (
-    <div className="relative z-40">
+    <div className="relative z-40 w-full">
       {banners.map((banner) => (
         <div
           key={banner.id}
-          className={`${banner.backgroundColor} ${banner.textColor} py-3 px-4 sm:px-6 relative ${
+          className={`${banner.backgroundColor} ${banner.textColor} py-2 sm:py-3 px-4 sm:px-6 relative ${
             banner.link ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''
-          }`}
-          onClick={() => handleBannerClick(banner)}
+          } w-full`}
         >
-          <div className="max-w-7xl mx-auto text-center">
-            <div className="flex items-center justify-center space-x-2">
-              <div>
-                <p className="font-semibold text-sm sm:text-base">{banner.title}</p>
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 text-center pr-8">
+                <p className="font-semibold text-xs sm:text-sm md:text-base truncate">{banner.title}</p>
                 {banner.description && (
-                  <p className="text-xs sm:text-sm opacity-90">{banner.description}</p>
+                  <p className="text-xs opacity-90 hidden sm:block">{banner.description}</p>
                 )}
               </div>
+              
+              {banner.dismissible && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`${banner.textColor} hover:bg-white/20 h-6 w-6 flex-shrink-0`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    dismissBanner(banner.id);
+                  }}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
             </div>
           </div>
-          
-          {banner.dismissible && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 ${banner.textColor} hover:bg-white/20 h-6 w-6 sm:h-8 sm:w-8`}
-              onClick={(e) => {
-                e.stopPropagation();
-                dismissBanner(banner.id);
-              }}
-            >
-              <X className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          )}
         </div>
       ))}
     </div>
