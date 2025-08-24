@@ -1,18 +1,58 @@
-
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useProductStore } from '@/store/productStore';
 import ProductCard from '@/components/ProductCard';
+import ProductFilters from '@/components/filters/ProductFilters';
+import AIChat from '@/components/chat/AIChat';
 
 const Women = () => {
   const { products, isLoading, fetchProducts } = useProductStore();
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  const womenProducts = products.filter(product => 
-    product.category === 'Women' || product.category === 'Lifestyle'
-  );
+  useEffect(() => {
+    const womenProducts = products.filter(product => 
+      product.category === 'Women' || product.category === 'Lifestyle'
+    );
+    setFilteredProducts(womenProducts);
+  }, [products]);
+
+  const handleFiltersChange = (filters: any) => {
+    let filtered = products.filter(product => 
+      product.category === 'Women' || product.category === 'Lifestyle'
+    );
+
+    // Apply category filter
+    if (filters.categories.length > 0) {
+      filtered = filtered.filter(product => 
+        filters.categories.includes(product.category)
+      );
+    }
+
+    // Apply price filter
+    filtered = filtered.filter(product => 
+      product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1]
+    );
+
+    // Apply sorting
+    switch (filters.sortBy) {
+      case 'price-low':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'newest':
+      default:
+        // Keep original order
+        break;
+    }
+
+    setFilteredProducts(filtered);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,18 +64,30 @@ const Women = () => {
           </p>
         </div>
 
-        {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-pulse text-nike-gray">Loading products...</div>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <div className="lg:w-64 flex-shrink-0">
+            <ProductFilters onFiltersChange={handleFiltersChange} />
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {womenProducts.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
+
+          {/* Products Grid */}
+          <div className="flex-1">
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-pulse text-nike-gray">Loading products...</div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredProducts.map((product, index) => (
+                  <ProductCard key={product.id} product={product} index={index} />
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
+
+      <AIChat isOpen={isChatOpen} onToggle={() => setIsChatOpen(!isChatOpen)} />
     </div>
   );
 };
