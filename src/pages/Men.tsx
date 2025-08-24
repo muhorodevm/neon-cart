@@ -30,8 +30,8 @@ const Men = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {menProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {menProducts.map((product, index) => (
+              <ProductCard key={product.id} product={product} index={index} />
             ))}
           </div>
         )}
