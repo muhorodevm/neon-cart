@@ -11,7 +11,7 @@ const Login = () => {
     <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-nike-dark">NIKE</h1>
+          <h1 className="text-4xl font-bold text-nike-dark">NDULA</h1>
           <h2 className="mt-6 text-3xl font-bold text-nike-dark">
             Sign in to your account
           </h2>
