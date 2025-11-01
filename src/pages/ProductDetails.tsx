@@ -1,15 +1,18 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProductStore } from '@/store/productStore';
+import { useCartStore } from '@/store/cartStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ShoppingCart, Heart, Share2, Truck, Shield, RotateCcw } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { products, fetchProducts } = useProductStore();
+  const { addToCart } = useCartStore();
+  const { toast } = useToast();
   const [selectedSize, setSelectedSize] = useState('');
   const [quantity, setQuantity] = useState(1);
 
@@ -68,7 +71,7 @@ const ProductDetails = () => {
                 {product.description}
               </p>
               <div className="text-3xl font-bold text-nike-orange mb-8">
-                ${product.price}
+                KES {product.price.toLocaleString()}
               </div>
             </div>
 
@@ -118,6 +121,21 @@ const ProductDetails = () => {
                 size="lg" 
                 className="w-full bg-nike-orange hover:bg-nike-orange/90 text-white py-4 text-lg font-semibold"
                 disabled={!selectedSize}
+                onClick={() => {
+                  addToCart({
+                    productId: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    size: selectedSize,
+                    quantity
+                  });
+                  toast({
+                    title: "Added to cart",
+                    description: `${product.name} (Size ${selectedSize}) added to your cart.`,
+                  });
+                  navigate('/cart');
+                }}
               >
                 Buy Now
               </Button>
@@ -126,6 +144,20 @@ const ProductDetails = () => {
                 size="lg" 
                 className="w-full border-nike-dark text-nike-dark hover:bg-nike-dark hover:text-white py-4 text-lg font-semibold"
                 disabled={!selectedSize}
+                onClick={() => {
+                  addToCart({
+                    productId: product.id,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    size: selectedSize,
+                    quantity
+                  });
+                  toast({
+                    title: "Added to cart",
+                    description: `${product.name} (Size ${selectedSize}) added to your cart.`,
+                  });
+                }}
               >
                 <ShoppingCart className="w-5 h-5 mr-2" />
                 Add to Cart
@@ -148,7 +180,7 @@ const ProductDetails = () => {
             <div className="border-t pt-6 space-y-4">
               <div className="flex items-center space-x-3">
                 <Truck className="w-5 h-5 text-nike-orange" />
-                <span className="text-nike-gray">Free shipping on orders over $150</span>
+                <span className="text-nike-gray">Free shipping on orders over KES 20,000</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Shield className="w-5 h-5 text-nike-orange" />

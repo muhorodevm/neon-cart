@@ -1,20 +1,24 @@
-
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/navigation/Navbar';
-import BannerManager from '@/components/banners/BannerManager';
-import FloatingBanner from '@/components/banners/FloatingBanner';
+import Footer from '@/components/layout/Footer';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
-    <div className="min-h-screen bg-background">
-      <BannerManager />
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main>{children}</main>
-      <FloatingBanner />
+      <main className="flex-1">{children}</main>
+      <Footer />
     </div>
   );
 };

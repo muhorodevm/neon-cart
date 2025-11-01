@@ -14,12 +14,16 @@ const Kids = () => {
   }, [fetchProducts]);
 
   useEffect(() => {
-    const kidsProducts = products.slice(0, 4); // Sample kids products
+    const kidsProducts = products.filter(product => 
+      product.category === 'Kids'
+    );
     setFilteredProducts(kidsProducts);
   }, [products]);
 
   const handleFiltersChange = (filters: any) => {
-    let filtered = products.slice(0, 4); // Sample kids products
+    let filtered = products.filter(product => 
+      product.category === 'Kids'
+    );
 
     // Apply price filter
     filtered = filtered.filter(product => 
@@ -62,8 +66,14 @@ const Kids = () => {
           {/* Products Grid */}
           <div className="flex-1">
             {isLoading ? (
-              <div className="text-center py-12">
-                <div className="animate-pulse text-nike-gray">Loading products...</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="bg-muted rounded-lg aspect-square mb-4"></div>
+                    <div className="h-4 bg-muted rounded mb-2"></div>
+                    <div className="h-4 bg-muted rounded w-2/3"></div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

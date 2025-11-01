@@ -4,10 +4,14 @@ import { Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { useCartStore } from '@/store/cartStore';
 
 const Navbar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { getTotalItems } = useCartStore();
+  const cartItemsCount = getTotalItems();
 
   const navItems = [
     { name: 'Men', path: '/men' },
@@ -54,8 +58,15 @@ const Navbar = () => {
               </Button>
             </Link>
             <Link to="/cart">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="relative">
                 <ShoppingBag className="h-5 w-5" />
+                {cartItemsCount > 0 && (
+                  <Badge 
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-nike-orange text-white text-xs"
+                  >
+                    {cartItemsCount}
+                  </Badge>
+                )}
               </Button>
             </Link>
 

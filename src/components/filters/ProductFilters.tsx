@@ -23,7 +23,7 @@ interface FilterState {
 const ProductFilters = ({ onFiltersChange, className = '' }: ProductFiltersProps) => {
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
-    priceRange: [0, 500],
+    priceRange: [0, 30000],
     sizes: [],
     brands: [],
     sortBy: 'newest'
@@ -69,7 +69,7 @@ const ProductFilters = ({ onFiltersChange, className = '' }: ProductFiltersProps
   const clearFilters = () => {
     const clearedFilters: FilterState = {
       categories: [],
-      priceRange: [0, 500],
+      priceRange: [0, 30000],
       sizes: [],
       brands: [],
       sortBy: 'newest'
@@ -143,19 +143,19 @@ const ProductFilters = ({ onFiltersChange, className = '' }: ProductFiltersProps
 
         {/* Price Range */}
         <div>
-          <h4 className="font-medium mb-3">Price Range</h4>
+          <h4 className="font-medium mb-3">Price Range (KES)</h4>
           <div className="px-3">
             <Slider
               value={filters.priceRange}
               onValueChange={(value) => updateFilters({ priceRange: value as [number, number] })}
-              max={500}
+              max={30000}
               min={0}
-              step={10}
+              step={1000}
               className="mb-4"
             />
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>${filters.priceRange[0]}</span>
-              <span>${filters.priceRange[1]}</span>
+              <span>KES {filters.priceRange[0].toLocaleString()}</span>
+              <span>KES {filters.priceRange[1].toLocaleString()}</span>
             </div>
           </div>
         </div>

@@ -51,7 +51,7 @@ const ProductCard = ({ product, index }: ProductCardProps) => {
         
         <div className="flex items-center justify-between">
           <span className="text-2xl font-bold text-nike-dark">
-            ${product.price}
+            KES {product.price.toLocaleString()}
           </span>
           <span className="text-sm text-nike-gray font-medium px-3 py-1 bg-nike-light-gray rounded-full">
             View Details

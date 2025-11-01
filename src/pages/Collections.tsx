@@ -39,8 +39,24 @@ const Collections = () => {
         </div>
 
         {isLoading ? (
-          <div className="text-center py-12">
-            <div className="animate-pulse text-nike-gray">Loading collections...</div>
+          <div className="space-y-16">
+            {[...Array(3)].map((_, colIndex) => (
+              <div key={colIndex} className="space-y-6">
+                <div className="text-center">
+                  <div className="h-8 bg-muted rounded w-64 mx-auto mb-2"></div>
+                  <div className="h-4 bg-muted rounded w-48 mx-auto"></div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="bg-muted rounded-lg aspect-square mb-4"></div>
+                      <div className="h-4 bg-muted rounded mb-2"></div>
+                      <div className="h-4 bg-muted rounded w-2/3"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="space-y-16">
