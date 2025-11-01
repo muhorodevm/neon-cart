@@ -10,6 +10,7 @@ import { X, Filter } from 'lucide-react';
 interface ProductFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
   className?: string;
+  currentCategory?: string;
 }
 
 interface FilterState {
@@ -20,7 +21,7 @@ interface FilterState {
   sortBy: string;
 }
 
-const ProductFilters = ({ onFiltersChange, className = '' }: ProductFiltersProps) => {
+const ProductFilters = ({ onFiltersChange, className = '', currentCategory }: ProductFiltersProps) => {
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     priceRange: [0, 30000],
@@ -29,7 +30,15 @@ const ProductFilters = ({ onFiltersChange, className = '' }: ProductFiltersProps
     sortBy: 'newest'
   });
 
-  const categories = ['Men', 'Women', 'Kids', 'Lifestyle', 'Running', 'Basketball'];
+  // Define categories based on current page
+  const getCategoriesForPage = () => {
+    if (currentCategory === 'Men') return ['Running', 'Basketball', 'Lifestyle', 'Training'];
+    if (currentCategory === 'Women') return ['Running', 'Lifestyle', 'Training', 'Casual'];
+    if (currentCategory === 'Kids') return ['Running', 'Casual', 'Sports', 'School'];
+    return ['Men', 'Women', 'Kids', 'Basketball'];
+  };
+
+  const categories = getCategoriesForPage();
   const sizes = ['7', '7.5', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12'];
   const brands = ['Nike', 'Air Jordan', 'Air Max', 'Dunk'];
   const sortOptions = [

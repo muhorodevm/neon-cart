@@ -67,7 +67,7 @@ const Women = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
           <div className="lg:w-64 flex-shrink-0">
-            <ProductFilters onFiltersChange={handleFiltersChange} />
+            <ProductFilters onFiltersChange={handleFiltersChange} currentCategory="Women" />
           </div>
 
           {/* Products Grid */}

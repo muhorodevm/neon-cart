@@ -1,12 +1,20 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Minus, Plus, Trash2, ShoppingBag, Smartphone } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Cart = () => {
-  const { items, removeFromCart, updateQuantity, getTotalPrice } = useCartStore();
+  const { items, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCartStore();
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   if (items.length === 0) {
     return (
@@ -31,6 +39,29 @@ const Cart = () => {
   const shipping = subtotal > 20000 ? 0 : 500;
   const tax = Math.round(subtotal * 0.16);
   const total = subtotal + shipping + tax;
+
+  const handleMpesaPayment = () => {
+    if (!phoneNumber || phoneNumber.length < 10) {
+      toast.error('Please enter a valid phone number');
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    // Simulate M-Pesa payment process
+    setTimeout(() => {
+      toast.success('M-Pesa payment initiated! Check your phone for the payment prompt.');
+      
+      // Simulate payment confirmation
+      setTimeout(() => {
+        setIsProcessing(false);
+        setIsCheckoutOpen(false);
+        toast.success('Payment successful! Your order has been placed.');
+        clearCart();
+        setPhoneNumber('');
+      }, 3000);
+    }, 2000);
+  };
 
   return (
     <div className="min-h-screen bg-background py-12 px-6">
@@ -141,6 +172,7 @@ const Cart = () => {
                 <Button 
                   size="lg" 
                   className="w-full bg-nike-orange hover:bg-nike-orange/90 text-white font-semibold py-6"
+                  onClick={() => setIsCheckoutOpen(true)}
                 >
                   Proceed to Checkout
                 </Button>
@@ -155,6 +187,73 @@ const Cart = () => {
           </div>
         </div>
       </div>
+
+      {/* M-Pesa Checkout Dialog */}
+      <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Smartphone className="h-5 w-5 text-green-600" />
+              M-Pesa Payment
+            </DialogTitle>
+            <DialogDescription>
+              Enter your M-Pesa phone number to complete your payment of KES {total.toLocaleString()}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input
+                id="phone"
+                placeholder="0712345678"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                maxLength={10}
+                disabled={isProcessing}
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter your Safaricom number starting with 07 or 01
+              </p>
+            </div>
+
+            <div className="bg-muted p-4 rounded-lg space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Subtotal:</span>
+                <span>KES {subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Shipping:</span>
+                <span>{shipping === 0 ? 'FREE' : `KES ${shipping.toLocaleString()}`}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Tax:</span>
+                <span>KES {tax.toLocaleString()}</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between font-bold">
+                <span>Total:</span>
+                <span>KES {total.toLocaleString()}</span>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleMpesaPayment}
+              disabled={isProcessing}
+              className="w-full bg-green-600 hover:bg-green-700"
+            >
+              {isProcessing ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Processing...
+                </>
+              ) : (
+                'Pay with M-Pesa'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
