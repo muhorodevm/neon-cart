@@ -8,7 +8,7 @@ const slides = [
     id: 1,
     title: 'Just Do It',
     subtitle: 'New Collection Drop',
-    description: 'Discover the latest Nike collection featuring iconic designs and cutting-edge technology.',
+    description: 'Cheki hizi latest kicks, ma-design ni kali na tech iko juu sana!',
     image: 'https://images.unsplash.com/photo-1556906781-9a412961c28c?w=1920&h=1080&fit=crop',
     cta: 'Shop Now'
   },
