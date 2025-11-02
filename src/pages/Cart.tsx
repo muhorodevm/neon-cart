@@ -9,12 +9,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingBag, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
+import Receipt from '@/components/dashboard/Receipt';
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCartStore();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState<any>(null);
 
   if (items.length === 0) {
     return (
@@ -54,11 +57,34 @@ const Cart = () => {
       
       // Simulate payment confirmation
       setTimeout(() => {
+        const orderNumber = `ORD-${Date.now()}`;
+        const receipt = {
+          orderNumber,
+          date: new Date().toLocaleDateString(),
+          items: items.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price * item.quantity,
+          })),
+          subtotal,
+          tax,
+          total,
+          customerInfo: {
+            name: 'John Doe',
+            email: 'john.doe@example.com',
+            phone: phoneNumber,
+            address: '123 Main Street, Nairobi, Kenya',
+          },
+          paymentMethod: 'M-Pesa',
+        };
+
+        setReceiptData(receipt);
         setIsProcessing(false);
         setIsCheckoutOpen(false);
         toast.success('Payment successful! Your order has been placed.');
         clearCart();
         setPhoneNumber('');
+        setShowReceipt(true);
       }, 3000);
     }, 2000);
   };
@@ -252,6 +278,13 @@ const Cart = () => {
               )}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipt Dialog */}
+      <Dialog open={showReceipt} onOpenChange={setShowReceipt}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          {receiptData && <Receipt {...receiptData} />}
         </DialogContent>
       </Dialog>
     </div>
