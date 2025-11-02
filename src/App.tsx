@@ -26,23 +26,24 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/men" element={<Men />} />
-            <Route path="/women" element={<Women />} />
-            <Route path="/kids" element={<Kids />} />
-            <Route path="/collections" element={<Collections />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
+        <Routes>
+          {/* Routes with Layout (Navbar + Footer) */}
+          <Route path="/" element={<Layout><Index /></Layout>} />
+          <Route path="/men" element={<Layout><Men /></Layout>} />
+          <Route path="/women" element={<Layout><Women /></Layout>} />
+          <Route path="/kids" element={<Layout><Kids /></Layout>} />
+          <Route path="/collections" element={<Layout><Collections /></Layout>} />
+          <Route path="/contact" element={<Layout><Contact /></Layout>} />
+          <Route path="/login" element={<Layout><Login /></Layout>} />
+          <Route path="/signup" element={<Layout><Signup /></Layout>} />
+          <Route path="/cart" element={<Layout><Cart /></Layout>} />
+          <Route path="/product/:id" element={<Layout><ProductDetails /></Layout>} />
+          <Route path="*" element={<Layout><NotFound /></Layout>} />
+          
+          {/* Dashboard routes without Layout */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

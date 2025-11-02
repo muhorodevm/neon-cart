@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -24,7 +25,20 @@ interface ReceiptProps {
 }
 
 const Receipt = ({ orderNumber, date, items, subtotal, tax, total, customerInfo, paymentMethod }: ReceiptProps) => {
+  useEffect(() => {
+    // Auto-download receipt as PDF after 1 second delay
+    const timer = setTimeout(() => {
+      handleDownloadPDF();
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownloadPDF = () => {
     window.print();
   };
 
@@ -104,7 +118,7 @@ const Receipt = ({ orderNumber, date, items, subtotal, tax, total, customerInfo,
             <Printer className="h-4 w-4 mr-2" />
             Print Receipt
           </Button>
-          <Button variant="outline" className="flex-1">
+          <Button onClick={handleDownloadPDF} variant="outline" className="flex-1">
             <Download className="h-4 w-4 mr-2" />
             Download PDF
           </Button>
