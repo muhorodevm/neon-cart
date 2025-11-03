@@ -14,9 +14,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Cart from "./pages/Cart";
 import ProductDetails from "./pages/ProductDetails";
-import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminOrderDetails from "./pages/AdminOrderDetails";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -41,8 +42,9 @@ const App = () => (
           <Route path="*" element={<Layout><NotFound /></Layout>} />
           
           {/* Dashboard routes without Layout */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/orders/:orderId" element={<AdminOrderDetails />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

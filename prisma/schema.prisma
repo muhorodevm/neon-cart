@@ -11,12 +11,15 @@ datasource db {
 }
 
 // User Management
+// Note: Supabase handles authentication via auth.users table
+// This model represents the user data synced from Supabase auth
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
-  password      String
-  role          UserRole  @default(CUSTOMER)
+  provider      AuthProvider  @default(EMAIL) // OAuth provider used
+  providerId    String?       // ID from OAuth provider
   isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
@@ -27,14 +30,39 @@ model User {
   addresses     Address[]
   reviews       Review[]
   wishlist      WishlistItem[]
+  userRoles     UserRole[]
 
   @@map("users")
 }
 
-enum UserRole {
+// OAuth Providers supported
+enum AuthProvider {
+  EMAIL       // Email/Password authentication
+  GOOGLE      // Google OAuth
+  FACEBOOK    // Facebook OAuth
+  GITHUB      // GitHub OAuth
+  APPLE       // Apple Sign In
+}
+
+// User Roles (separate table for security - prevents privilege escalation)
+model UserRole {
+  id          String   @id @default(uuid())
+  userId      String
+  role        AppRole  @default(CUSTOMER)
+  assignedAt  DateTime @default(now())
+  assignedBy  String?  // ID of admin who assigned the role
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
+  @@map("user_roles")
+}
+
+enum AppRole {
   CUSTOMER
   ADMIN
   SUPER_ADMIN
+  MODERATOR
 }
 
 // User Profile

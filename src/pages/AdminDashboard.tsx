@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Package, DollarSign, ShoppingCart, Users, TrendingUp, AlertCircle, BarChart3, Plus, Edit, Trash2, Eye, AlertTriangle } from 'lucide-react';
+import { Package, DollarSign, ShoppingCart, Users, TrendingUp, AlertCircle, BarChart3, Plus, Edit, Trash2, Eye, AlertTriangle, FileText } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import ProductForm from '@/components/forms/ProductForm';
@@ -12,8 +13,10 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('overview');
   const [showProductForm, setShowProductForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   const stats = {
@@ -72,6 +75,11 @@ const AdminDashboard = () => {
   const handleProductSubmit = (data: any) => {
     console.log('Product submitted:', data);
     setShowProductForm(false);
+  };
+
+  const handleEditProduct = (data: any) => {
+    console.log('Updated product:', data);
+    setEditingProduct(null);
   };
 
   const handleOrderStatusUpdate = (orderId: string, newStatus: string) => {
@@ -267,7 +275,11 @@ const AdminDashboard = () => {
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                <Button variant="ghost" size="sm">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => setEditingProduct(product)}
+                                >
                                   <Edit className="h-4 w-4" />
                                 </Button>
                                 <Button 
@@ -392,16 +404,26 @@ const AdminDashboard = () => {
                             </TableCell>
                             <TableCell>{order.date}</TableCell>
                             <TableCell>
-                              <Select onValueChange={(value) => handleOrderStatusUpdate(order.id, value)}>
-                                <SelectTrigger className="w-32">
-                                  <SelectValue placeholder="Update" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="processing">Processing</SelectItem>
-                                  <SelectItem value="shipping">Shipping</SelectItem>
-                                  <SelectItem value="delivered">Delivered</SelectItem>
-                                </SelectContent>
-                              </Select>
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => navigate(`/admin/orders/${order.id}`)}
+                                >
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Details
+                                </Button>
+                                <Select onValueChange={(value) => handleOrderStatusUpdate(order.id, value)}>
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue placeholder="Update" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="processing">Processing</SelectItem>
+                                    <SelectItem value="shipping">Shipping</SelectItem>
+                                    <SelectItem value="delivered">Delivered</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -460,6 +482,29 @@ const AdminDashboard = () => {
             )}
           </div>
         </main>
+
+        {/* Edit Product Dialog */}
+        <Dialog open={!!editingProduct} onOpenChange={(open) => !open && setEditingProduct(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+            </DialogHeader>
+            {editingProduct && (
+              <ProductForm 
+                onSubmit={handleEditProduct} 
+                initialData={{
+                  name: editingProduct.name,
+                  price: editingProduct.price.toString(),
+                  stock: editingProduct.stock.toString(),
+                  category: 'Men',
+                  subcategory: 'Running',
+                  description: 'Product description',
+                  image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff'
+                }} 
+              />
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Delete Confirmation Dialog */}
         <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
