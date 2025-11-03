@@ -1,11 +1,10 @@
-
-import { useState } from 'react';
-import { Menu, Search, ShoppingBag, User, X } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
-import { useCartStore } from '@/store/cartStore';
+import { useState } from "react";
+import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
+import { useCartStore } from "@/store/cartStore";
 
 const Navbar = () => {
   const location = useLocation();
@@ -14,12 +13,12 @@ const Navbar = () => {
   const cartItemsCount = getTotalItems();
 
   const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Men', path: '/men' },
-    { name: 'Women', path: '/women' },
-    { name: 'Kids', path: '/kids' },
-    { name: 'Collections', path: '/collections' },
-    { name: 'Contact', path: '/contact' }
+    { name: "Home", path: "/" },
+    { name: "Men", path: "/men" },
+    { name: "Women", path: "/women" },
+    { name: "Kids", path: "/kids" },
+    { name: "Collections", path: "/collections" },
+    { name: "Contact", path: "/contact" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -40,7 +39,7 @@ const Navbar = () => {
                 key={item.name}
                 to={item.path}
                 className={`text-sm font-medium transition-colors hover:text-nike-orange ${
-                  isActive(item.path) ? 'text-nike-orange' : 'text-nike-dark'
+                  isActive(item.path) ? "text-nike-orange" : "text-nike-dark"
                 }`}
               >
                 {item.name}
@@ -62,9 +61,7 @@ const Navbar = () => {
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingBag className="h-5 w-5" />
                 {cartItemsCount > 0 && (
-                  <Badge 
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-nike-orange text-white text-xs"
-                  >
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-nike-orange text-white text-xs">
                     {cartItemsCount}
                   </Badge>
                 )}
@@ -80,7 +77,7 @@ const Navbar = () => {
               </SheetTrigger>
               <SheetContent side="left" className="w-80">
                 <div className="flex flex-col space-y-6 mt-6">
-                  <div className="text-2xl font-bold text-nike-dark">NIKE</div>
+                  <div className="text-2xl font-bold text-nike-dark">NDULA</div>
                   <div className="flex flex-col space-y-4">
                     {navItems.map((item) => (
                       <Link
@@ -88,7 +85,9 @@ const Navbar = () => {
                         to={item.path}
                         onClick={() => setIsOpen(false)}
                         className={`text-lg font-medium transition-colors hover:text-nike-orange ${
-                          isActive(item.path) ? 'text-nike-orange' : 'text-nike-dark'
+                          isActive(item.path)
+                            ? "text-nike-orange"
+                            : "text-nike-dark"
                         }`}
                       >
                         {item.name}
