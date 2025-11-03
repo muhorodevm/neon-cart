@@ -2,16 +2,17 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Package, Truck, CreditCard, User, MapPin, Settings, History } from 'lucide-react';
+import { Package, Truck, CreditCard, User, MapPin, Download } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { NavLink } from 'react-router-dom';
 import ProfileForm from '@/components/forms/ProfileForm';
 import AddressForm from '@/components/forms/AddressForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import Receipt from '@/components/dashboard/Receipt';
 
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState('orders');
   const [showAddressForm, setShowAddressForm] = useState(false);
+  const [selectedOrderForReceipt, setSelectedOrderForReceipt] = useState<any>(null);
 
   const orders = [
     {
@@ -165,11 +166,56 @@ const Dashboard = () => {
                               ))}
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right space-y-2">
                             <p className="text-lg font-semibold">KES {order.total.toLocaleString()}</p>
-                            <Button variant="outline" size="sm" className="mt-2">
-                              Track Order
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm">
+                                Track Order
+                              </Button>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => setSelectedOrderForReceipt({
+                                      orderId: order.id,
+                                      date: order.date,
+                                      items: order.items,
+                                      subtotal: order.total,
+                                      total: order.total,
+                                      customerName: 'John Doe',
+                                      customerEmail: 'john.doe@example.com',
+                                      customerPhone: '+254 712 345 678'
+                                    })}
+                                  >
+                                    <Download className="h-4 w-4 mr-1" />
+                                    Receipt
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                                  <DialogHeader>
+                                    <DialogTitle>Order Receipt</DialogTitle>
+                                  </DialogHeader>
+                                  {selectedOrderForReceipt && (
+                                    <Receipt 
+                                      orderNumber={selectedOrderForReceipt.orderId}
+                                      date={selectedOrderForReceipt.date}
+                                      items={selectedOrderForReceipt.items}
+                                      subtotal={selectedOrderForReceipt.subtotal}
+                                      tax={0}
+                                      total={selectedOrderForReceipt.total}
+                                      customerInfo={{
+                                        name: selectedOrderForReceipt.customerName,
+                                        email: selectedOrderForReceipt.customerEmail,
+                                        phone: selectedOrderForReceipt.customerPhone,
+                                        address: '123 Main Street, Nairobi'
+                                      }}
+                                      paymentMethod="M-Pesa"
+                                    />
+                                  )}
+                                </DialogContent>
+                              </Dialog>
+                            </div>
                           </div>
                         </div>
                       </CardContent>

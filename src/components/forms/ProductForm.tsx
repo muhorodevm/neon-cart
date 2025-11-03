@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { Upload, X } from 'lucide-react';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters'),
@@ -16,7 +17,7 @@ const productSchema = z.object({
   subcategory: z.string().min(1, 'Please select a subcategory'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   stock: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, 'Stock must be a non-negative number'),
-  image: z.string().url('Please enter a valid image URL'),
+  image: z.string().min(1, 'Please provide an image'),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -28,6 +29,8 @@ interface ProductFormProps {
 
 const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
   const { toast } = useToast();
+  const [imagePreview, setImagePreview] = useState<string>(initialData?.image || '');
+  
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: initialData || {
@@ -40,6 +43,24 @@ const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
       image: '',
     },
   });
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImagePreview(result);
+        form.setValue('image', result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview('');
+    form.setValue('image', '');
+  };
 
   const handleSubmit = (data: ProductFormValues) => {
     onSubmit(data);
@@ -165,19 +186,62 @@ const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="image"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Image URL</FormLabel>
-              <FormControl>
-                <Input placeholder="https://example.com/image.jpg" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="image"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Product Image</FormLabel>
+                <FormControl>
+                  <div className="space-y-4">
+                    {imagePreview ? (
+                      <div className="relative w-full h-48 border-2 border-dashed rounded-lg overflow-hidden">
+                        <img 
+                          src={imagePreview} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2"
+                          onClick={removeImage}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-10 h-10 mb-3 text-muted-foreground" />
+                          <p className="mb-2 text-sm text-muted-foreground">
+                            <span className="font-semibold">Click to upload</span> or drag and drop
+                          </p>
+                          <p className="text-xs text-muted-foreground">PNG, JPG, WEBP (MAX. 5MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                        />
+                      </label>
+                    )}
+                    <Input 
+                      placeholder="Or enter image URL" 
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setImagePreview(e.target.value);
+                      }}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
         <Button type="submit" className="w-full">
           {initialData ? 'Update Product' : 'Add Product'}

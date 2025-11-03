@@ -13,18 +13,33 @@ const Collections = () => {
   const collections = [
     {
       title: 'Air Jordan Legacy',
-      description: 'Iconic basketball heritage',
+      description: 'Iconic basketball heritage meets street culture',
       products: products.filter(p => p.name.includes('Jordan'))
     },
     {
       title: 'Air Max Series', 
-      description: 'Revolutionary cushioning technology',
+      description: 'Revolutionary cushioning technology for ultimate comfort',
       products: products.filter(p => p.name.includes('Air Max'))
     },
     {
-      title: 'Classic Lifestyle',
-      description: 'Timeless designs for everyday wear',
-      products: products.filter(p => p.category === 'Lifestyle')
+      title: 'Basketball Collection',
+      description: 'Performance footwear for the court',
+      products: products.filter(p => p.category === 'Basketball')
+    },
+    {
+      title: 'Lifestyle Essentials',
+      description: 'Timeless designs for everyday wear and casual style',
+      products: products.filter(p => p.category === 'Lifestyle' || p.name.includes('Air Force'))
+    },
+    {
+      title: 'Running Collection',
+      description: 'Built for speed, comfort, and endurance',
+      products: products.filter(p => p.category === 'Running')
+    },
+    {
+      title: 'Women\'s Exclusives',
+      description: 'Designed specifically for women athletes',
+      products: products.filter(p => p.category === 'Women')
     }
   ];
 

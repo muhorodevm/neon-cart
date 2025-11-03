@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ShoppingCart, Heart, Share2, Truck, Shield, RotateCcw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ProductCard from '@/components/ProductCard';
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -24,6 +25,11 @@ const ProductDetails = () => {
 
   const product = products.find(p => p.id === id);
   const sizes = ['7', '7.5', '8', '8.5', '9', '9.5', '10', '10.5', '11', '11.5', '12'];
+  
+  // Get related products from the same category
+  const relatedProducts = products
+    .filter(p => p.id !== id && p.category === product?.category)
+    .slice(0, 4);
 
   if (!product) {
     return (
@@ -193,6 +199,18 @@ const ProductDetails = () => {
             </div>
           </div>
         </div>
+
+        {/* Related Products Section */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold text-nike-dark mb-8">You May Also Like</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {relatedProducts.map((relatedProduct, index) => (
+                <ProductCard key={relatedProduct.id} product={relatedProduct} index={index} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

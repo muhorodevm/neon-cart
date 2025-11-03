@@ -3,16 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Package, DollarSign, ShoppingCart, Users, TrendingUp, AlertCircle, BarChart3, Settings, ClipboardList, Plus, Edit, Trash2, Eye, AlertTriangle } from 'lucide-react';
+import { Package, DollarSign, ShoppingCart, Users, TrendingUp, AlertCircle, BarChart3, Plus, Edit, Trash2, Eye, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import ProductForm from '@/components/forms/ProductForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [showProductForm, setShowProductForm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
   const stats = {
     totalProducts: 156,
@@ -74,6 +76,14 @@ const AdminDashboard = () => {
 
   const handleOrderStatusUpdate = (orderId: string, newStatus: string) => {
     console.log('Updating order', orderId, 'to', newStatus);
+  };
+
+  const handleDeleteProduct = () => {
+    if (productToDelete) {
+      console.log('Deleting product:', productToDelete);
+      // Delete logic here
+      setProductToDelete(null);
+    }
   };
 
   return (
@@ -260,8 +270,12 @@ const AdminDashboard = () => {
                                 <Button variant="ghost" size="sm">
                                   <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm">
-                                  <Trash2 className="h-4 w-4" />
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => setProductToDelete(product.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                               </div>
                             </TableCell>
@@ -399,17 +413,71 @@ const AdminDashboard = () => {
             )}
 
             {activeSection === 'customers' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Customer Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Customer list and management features coming soon...</p>
-                </CardContent>
-              </Card>
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold">Customer Management</h2>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>All Customers</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Orders</TableHead>
+                          <TableHead>Total Spent</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {[
+                          { id: 1, name: 'John Doe', email: 'john.doe@example.com', phone: '+254 712 345 678', orders: 5, totalSpent: 67000 },
+                          { id: 2, name: 'Jane Smith', email: 'jane.smith@example.com', phone: '+254 723 456 789', orders: 3, totalSpent: 45000 },
+                          { id: 3, name: 'Bob Johnson', email: 'bob.johnson@example.com', phone: '+254 734 567 890', orders: 2, totalSpent: 28000 },
+                          { id: 4, name: 'Alice Williams', email: 'alice.w@example.com', phone: '+254 745 678 901', orders: 7, totalSpent: 98000 }
+                        ].map((customer) => (
+                          <TableRow key={customer.id}>
+                            <TableCell className="font-medium">{customer.name}</TableCell>
+                            <TableCell>{customer.email}</TableCell>
+                            <TableCell>{customer.phone}</TableCell>
+                            <TableCell>{customer.orders}</TableCell>
+                            <TableCell className="font-semibold">KES {customer.totalSpent.toLocaleString()}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </div>
         </main>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the product from your inventory.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteProduct} className="bg-destructive hover:bg-destructive/90">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </SidebarProvider>
   );
