@@ -20,6 +20,7 @@ model User {
   providerId    String?       // ID from OAuth provider
   isActive      Boolean   @default(true)
   emailVerified Boolean   @default(false)
+  passwordHash  String?       // For email/password auth
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
@@ -219,6 +220,7 @@ model Order {
   total           Decimal       @db.Decimal(10, 2)
   notes           String?       @db.Text
   trackingNumber  String?
+  receiptUrl      String?       // PDF receipt URL
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   
