@@ -55,11 +55,11 @@ const App = () => (
           
           {/* Admin Routes (Protected) */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/overview" element={<AdminOverview />} />
-          <Route path="/admin/products" element={<AdminProducts />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/admin/orders/:orderId" element={<AdminOrderDetails />} />
-          <Route path="/admin/customers" element={<AdminCustomers />} />
+          <Route path="/admin/overview" element={<RouteProtection requireAdmin><AdminLayout><AdminOverview /></AdminLayout></RouteProtection>} />
+          <Route path="/admin/products" element={<RouteProtection requireAdmin><AdminLayout><AdminProducts /></AdminLayout></RouteProtection>} />
+          <Route path="/admin/orders" element={<RouteProtection requireAdmin><AdminLayout><AdminOrders /></AdminLayout></RouteProtection>} />
+          <Route path="/admin/orders/:orderId" element={<RouteProtection requireAdmin><AdminLayout><AdminOrderDetails /></AdminLayout></RouteProtection>} />
+          <Route path="/admin/customers" element={<RouteProtection requireAdmin><AdminLayout><AdminCustomers /></AdminLayout></RouteProtection>} />
           
           {/* 404 */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />

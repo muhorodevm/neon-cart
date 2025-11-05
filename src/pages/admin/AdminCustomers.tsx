@@ -30,66 +30,64 @@ const AdminCustomers = () => {
   });
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Customers</h1>
-          <p className="text-muted-foreground">Manage your customer base</p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              All Customers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Total Orders</TableHead>
-                  <TableHead>Total Spent</TableHead>
-                  <TableHead>Joined</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {customers?.map((customer) => (
-                  <TableRow key={customer.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={customer.profile.avatarUrl || ""} />
-                          <AvatarFallback>
-                            {customer.profile.firstName[0]}
-                            {customer.profile.lastName[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">
-                            {customer.profile.firstName} {customer.profile.lastName}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{customer.totalOrders}</Badge>
-                    </TableCell>
-                    <TableCell>KSh {customer.totalSpent.toLocaleString()}</TableCell>
-                    <TableCell>
-                      {new Date(customer.createdAt).toLocaleDateString()}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Customers</h1>
+        <p className="text-muted-foreground">Manage your customer base</p>
       </div>
-    </AdminLayout>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            All Customers
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Customer</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Total Orders</TableHead>
+                <TableHead>Total Spent</TableHead>
+                <TableHead>Joined</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {customers?.map((customer) => (
+                <TableRow key={customer.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src={customer.profile.avatarUrl || ""} />
+                        <AvatarFallback>
+                          {customer.profile.firstName[0]}
+                          {customer.profile.lastName[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">
+                          {customer.profile.firstName} {customer.profile.lastName}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{customer.email}</TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">{customer.totalOrders}</Badge>
+                  </TableCell>
+                  <TableCell>KSh {customer.totalSpent.toLocaleString()}</TableCell>
+                  <TableCell>
+                    {new Date(customer.createdAt).toLocaleDateString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
