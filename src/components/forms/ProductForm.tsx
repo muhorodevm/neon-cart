@@ -17,6 +17,7 @@ const productSchema = z.object({
   subcategory: z.string().min(1, 'Please select a subcategory'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   stock: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, 'Stock must be a non-negative number'),
+  sizes: z.string().min(1, 'Please provide available sizes (e.g., 40,41,42)'),
   image: z.string().min(1, 'Please provide an image'),
 });
 
@@ -40,6 +41,7 @@ const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
       subcategory: '',
       description: '',
       stock: '',
+      sizes: '',
       image: '',
     },
   });
@@ -87,7 +89,7 @@ const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <FormField
             control={form.control}
             name="price"
@@ -110,6 +112,20 @@ const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
                 <FormLabel>Stock</FormLabel>
                 <FormControl>
                   <Input type="number" placeholder="50" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="sizes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Available Sizes</FormLabel>
+                <FormControl>
+                  <Input placeholder="40,41,42,43,44" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -195,11 +211,12 @@ const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
                 <FormControl>
                   <div className="space-y-4">
                     {imagePreview ? (
-                      <div className="relative w-full h-48 border-2 border-dashed rounded-lg overflow-hidden">
+                      <div className="relative w-full h-64 border-2 border-dashed rounded-lg overflow-hidden bg-muted">
                         <img 
                           src={imagePreview} 
                           alt="Preview" 
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
+                          style={{ imageRendering: 'crisp-edges' }}
                         />
                         <Button
                           type="button"

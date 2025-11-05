@@ -2,17 +2,21 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Package, Truck, CreditCard, User, MapPin, Download } from 'lucide-react';
+import { Package, Truck, CreditCard, User, MapPin, Download, BarChart3, Edit, Trash2 } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import ProfileForm from '@/components/forms/ProfileForm';
 import AddressForm from '@/components/forms/AddressForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Receipt from '@/components/dashboard/Receipt';
+import DashboardAnalytics from './dashboard/DashboardAnalytics';
+import { useToast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
+  const { toast } = useToast();
   const [activeSection, setActiveSection] = useState('orders');
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [selectedOrderForReceipt, setSelectedOrderForReceipt] = useState<any>(null);
+  const [editingAddress, setEditingAddress] = useState<any>(null);
 
   const orders = [
     {
@@ -54,6 +58,7 @@ const Dashboard = () => {
     { title: 'Orders', icon: Package, section: 'orders' },
     { title: 'Profile', icon: User, section: 'profile' },
     { title: 'Addresses', icon: MapPin, section: 'addresses' },
+    { title: 'Analytics', icon: BarChart3, section: 'analytics' },
   ];
 
   const getStatusColor = (status: string) => {
@@ -72,6 +77,19 @@ const Dashboard = () => {
   const handleAddressSubmit = (data: any) => {
     console.log('Address submitted:', data);
     setShowAddressForm(false);
+    setEditingAddress(null);
+    toast({
+      title: editingAddress ? 'Address Updated' : 'Address Added',
+      description: editingAddress ? 'Your address has been updated successfully' : 'New address has been added successfully',
+    });
+  };
+
+  const handleDeleteAddress = (id: number) => {
+    console.log('Delete address:', id);
+    toast({
+      title: 'Address Deleted',
+      description: 'Address has been removed successfully',
+    });
   };
 
   return (
@@ -253,15 +271,19 @@ const Dashboard = () => {
                   <h2 className="text-xl font-semibold">Saved Addresses</h2>
                   <Dialog open={showAddressForm} onOpenChange={setShowAddressForm}>
                     <DialogTrigger asChild>
-                      <Button>Add New Address</Button>
+                      <Button onClick={() => setEditingAddress(null)}>Add New Address</Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Add New Address</DialogTitle>
+                        <DialogTitle>{editingAddress ? 'Edit Address' : 'Add New Address'}</DialogTitle>
                       </DialogHeader>
                       <AddressForm
+                        initialData={editingAddress}
                         onSubmit={handleAddressSubmit}
-                        onCancel={() => setShowAddressForm(false)}
+                        onCancel={() => {
+                          setShowAddressForm(false);
+                          setEditingAddress(null);
+                        }}
                       />
                     </DialogContent>
                   </Dialog>
@@ -284,8 +306,25 @@ const Dashboard = () => {
                             </p>
                           </div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">Edit</Button>
-                            <Button variant="outline" size="sm">Delete</Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setEditingAddress(address);
+                                setShowAddressForm(true);
+                              }}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteAddress(address.id)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -294,6 +333,8 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
+
+            {activeSection === 'analytics' && <DashboardAnalytics />}
           </div>
         </main>
       </div>

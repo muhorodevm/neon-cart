@@ -26,29 +26,36 @@ export async function generateReceipt(orderId: string): Promise<string> {
       throw new Error('Order not found');
     }
 
-    // In production, generate actual PDF and upload to storage
-    // For now, return a placeholder receipt URL
+    // Generate receipt data for PDF
     const receiptData = {
       orderNumber: order.orderNumber,
       date: order.createdAt.toISOString(),
       customer: {
         name: `${order.user.profile?.firstName} ${order.user.profile?.lastName}`,
         email: order.user.email,
+        phone: order.user.profile?.phone || '',
+        address: order.address ? 
+          `${order.address.street}, ${order.address.city}, ${order.address.postalCode}, ${order.address.country}` : 
+          'No address provided',
       },
       items: order.items.map((item) => ({
         name: item.product.name,
         quantity: item.quantity,
         price: item.price,
+        size: item.size || 'N/A',
         total: item.price * item.quantity,
       })),
       subtotal: order.subtotal,
       tax: order.tax,
       shipping: order.shipping,
       total: order.total,
-      payment: order.payments[0],
+      paymentMethod: order.payments[0]?.method || 'M-Pesa',
+      paymentCode: order.payments[0]?.transactionId || '',
     };
 
-    // Simulate receipt URL (in production, this would be uploaded to storage)
+    // In production, generate actual PDF using a library like puppeteer or pdfkit
+    // and upload to cloud storage (ImageKit, S3, etc.)
+    // For now, return a simulated receipt URL
     const receiptUrl = `https://receipts.ndula.com/${order.orderNumber}.pdf`;
 
     console.log('Receipt generated:', receiptData);

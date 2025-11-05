@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 interface User {
   id: string;
   email: string;
-  roles: string[];
+  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
   profile?: {
     firstName: string;
     lastName: string;
@@ -32,7 +32,15 @@ export const useAuthStore = create<AuthState>()(
       isAdmin: false,
 
       login: (token: string, user: User) => {
-        const isAdmin = user.roles.includes('ADMIN') || user.roles.includes('SUPER_ADMIN');
+        const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+        
+        // Store in localStorage for API client
+        localStorage.setItem('authToken', token);
+        if (isAdmin) {
+          localStorage.setItem('adminAuth', token);
+          localStorage.setItem('userRole', user.role);
+        }
+        
         set({
           token,
           user,
@@ -42,6 +50,11 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        // Clear localStorage
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('adminAuth');
+        localStorage.removeItem('userRole');
+        
         set({
           token: null,
           user: null,

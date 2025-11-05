@@ -69,9 +69,16 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-8">{children}</div>
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Bar */}
+        <header className="h-16 border-b flex items-center px-6 bg-card">
+          <h2 className="text-xl font-semibold">Admin Dashboard</h2>
+        </header>
+
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto p-8">{children}</div>
+        </main>
+      </div>
     </div>
   );
 };
