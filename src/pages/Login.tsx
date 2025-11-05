@@ -18,18 +18,23 @@ const Login = () => {
       const response = await authApi.login(logindata);
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       console.log("✅ Login successful:", data);
 
-      // Save token (if your API returns it)
+      // Save token and user info
       if (data?.token) {
         localStorage.setItem("authToken", data.token);
+      }
+      
+      if (data?.user) {
+        localStorage.setItem("userAuth", "true");
+        localStorage.setItem("userRole", data.user.roles?.[0]?.role || "CUSTOMER");
       }
 
       // Redirect to dashboard or home page
       navigate("/");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("❌ Login failed:", error);
     },
   });
@@ -110,8 +115,8 @@ const Login = () => {
           {/* Error message */}
           {loginMutation.isError && (
             <p className="text-red-500 text-sm font-medium mt-2">
-              {loginMutation.error?.response?.data?.message ||
-                loginMutation.error?.message ||
+              {(loginMutation.error as any)?.response?.data?.message ||
+                (loginMutation.error as any)?.message ||
                 "Login failed"}
             </p>
           )}

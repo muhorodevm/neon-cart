@@ -55,7 +55,7 @@ export const authApi = {
   login: (data: { email: string; password: string }) =>
     apiClient.post("/auth/login", data),
 
-  verifyOtp: (data: { email: string; otp: string }) =>
+  verifyOtp: (data: { email: string; otp: string; tempData?: any }) =>
     apiClient.post("/auth/verify-otp", data),
 
   resendOtp: (data: { email: string }) =>

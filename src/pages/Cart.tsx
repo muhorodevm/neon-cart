@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ShoppingBag, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import Receipt from '@/components/dashboard/Receipt';
+import { orderApi, paymentApi, userApi } from '@/lib/api';
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCartStore();
@@ -43,7 +44,7 @@ const Cart = () => {
   const tax = Math.round(subtotal * 0.16);
   const total = subtotal + shipping + tax;
 
-  const handleMpesaPayment = () => {
+  const handleMpesaPayment = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
       toast.error('Please enter a valid phone number');
       return;
@@ -51,42 +52,113 @@ const Cart = () => {
 
     setIsProcessing(true);
     
-    // Simulate M-Pesa payment process
-    setTimeout(() => {
-      toast.success('M-Pesa payment initiated! Check your phone for the payment prompt.');
-      
-      // Simulate payment confirmation
-      setTimeout(() => {
-        const orderNumber = `ORD-${Date.now()}`;
-        const receipt = {
-          orderNumber,
-          date: new Date().toLocaleDateString(),
-          items: items.map(item => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price * item.quantity,
-          })),
-          subtotal,
-          tax,
-          total,
-          customerInfo: {
-            name: 'John Doe',
-            email: 'john.doe@example.com',
-            phone: phoneNumber,
-            address: '123 Main Street, Nairobi, Kenya',
-          },
-          paymentMethod: 'M-Pesa',
-        };
+    try {
+      // Get user addresses (assuming user is logged in)
+      const addressResponse = await userApi.getAddresses();
+      const addresses = addressResponse.data as any[];
+      const defaultAddress = addresses.find((addr: any) => addr.isDefault) || addresses[0];
 
-        setReceiptData(receipt);
-        setIsProcessing(false);
-        setIsCheckoutOpen(false);
-        toast.success('Payment successful! Your order has been placed.');
-        clearCart();
-        setPhoneNumber('');
-        setShowReceipt(true);
-      }, 3000);
-    }, 2000);
+      // Create order
+      const orderData = {
+        items: items.map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+          size: item.size,
+          price: item.price,
+        })),
+        addressId: defaultAddress?.id,
+        paymentMethod: 'MPESA',
+        mpesaPhoneNumber: phoneNumber,
+        subtotal,
+        tax,
+        shipping,
+        total,
+      };
+
+      const orderResponse = await orderApi.create(orderData);
+      const order = orderResponse.data as any;
+
+      toast.success('Order created! Initiating M-Pesa payment...');
+
+      // Initiate M-Pesa payment
+      const paymentResponse = await paymentApi.initiateMpesa({
+        orderId: order.id,
+        phoneNumber,
+        amount: total,
+      });
+      const paymentData = paymentResponse.data as any;
+
+      toast.success('M-Pesa payment initiated! Check your phone for the payment prompt.');
+
+      // Poll for payment status
+      let attempts = 0;
+      const maxAttempts = 20;
+      
+      const checkPaymentStatus = async () => {
+        try {
+          const statusResponse = await paymentApi.getPaymentStatus(paymentData.transactionId);
+          const paymentStatus = statusResponse.data as any;
+          
+          if (paymentStatus.status === 'COMPLETED') {
+            const receipt = {
+              orderNumber: order.orderNumber,
+              date: new Date().toLocaleDateString(),
+              items: items.map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price * item.quantity,
+              })),
+              subtotal,
+              tax,
+              shipping,
+              total,
+              customerInfo: {
+                name: defaultAddress?.label || 'Customer',
+                email: 'customer@example.com',
+                phone: phoneNumber,
+                address: `${defaultAddress?.street}, ${defaultAddress?.city}, ${defaultAddress?.country}`,
+              },
+              paymentMethod: 'M-Pesa',
+              paymentCode: paymentStatus.mpesaReceiptNumber,
+            };
+
+            setReceiptData(receipt);
+            setIsProcessing(false);
+            setIsCheckoutOpen(false);
+            toast.success('Payment successful! Your order has been placed.');
+            clearCart();
+            setPhoneNumber('');
+            setShowReceipt(true);
+          } else if (paymentStatus.status === 'FAILED') {
+            setIsProcessing(false);
+            toast.error('Payment failed. Please try again.');
+          } else if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(checkPaymentStatus, 3000);
+          } else {
+            setIsProcessing(false);
+            toast.error('Payment timeout. Please check your order status.');
+          }
+        } catch (error) {
+          console.error('Error checking payment status:', error);
+          if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(checkPaymentStatus, 3000);
+          } else {
+            setIsProcessing(false);
+            toast.error('Unable to verify payment. Please contact support.');
+          }
+        }
+      };
+
+      // Start checking payment status after 5 seconds
+      setTimeout(checkPaymentStatus, 5000);
+      
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      setIsProcessing(false);
+      toast.error(error?.response?.data?.error || 'Checkout failed. Please try again.');
+    }
   };
 
   return (
