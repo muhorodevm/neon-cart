@@ -23,6 +23,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminOrderDetails from "./pages/AdminOrderDetails";
 import NotFound from "./pages/NotFound";
 
@@ -54,10 +55,11 @@ const App = () => (
           
           {/* Admin Routes (Protected) */}
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/overview" element={<RouteProtection requireAdmin><AdminLayout><AdminOverview /></AdminLayout></RouteProtection>} />
-          <Route path="/admin/products" element={<RouteProtection requireAdmin><AdminLayout><AdminProducts /></AdminLayout></RouteProtection>} />
-          <Route path="/admin/orders" element={<RouteProtection requireAdmin><AdminLayout><AdminOrders /></AdminLayout></RouteProtection>} />
-          <Route path="/admin/orders/:orderId" element={<RouteProtection requireAdmin><AdminLayout><AdminOrderDetails /></AdminLayout></RouteProtection>} />
+          <Route path="/admin/overview" element={<AdminOverview />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/orders" element={<AdminOrders />} />
+          <Route path="/admin/orders/:orderId" element={<AdminOrderDetails />} />
+          <Route path="/admin/customers" element={<AdminCustomers />} />
           
           {/* 404 */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />

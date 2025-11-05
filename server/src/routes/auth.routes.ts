@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { AuthController } from '../controllers/auth.controller';
+import { signup, verifySignupOTP, resendOTP, login, requestPasswordReset, resetPassword } from '../controllers/auth.functions';
 import { validate } from '../middlewares/validation.middleware';
 import { z } from 'zod';
 
 const router = Router();
-const authController = new AuthController();
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -35,10 +34,11 @@ const resetPasswordSchema = z.object({
   newPassword: z.string().min(8),
 });
 
-router.post('/signup', validate(signupSchema), authController.signup);
-router.post('/verify-otp', validate(verifyOTPSchema), authController.verifySignupOTP);
-router.post('/login', validate(loginSchema), authController.login);
-router.post('/request-password-reset', authController.requestPasswordReset);
-router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
+router.post('/signup', validate(signupSchema), signup);
+router.post('/verify-otp', validate(verifyOTPSchema), verifySignupOTP);
+router.post('/resend-otp', resendOTP);
+router.post('/login', validate(loginSchema), login);
+router.post('/request-password-reset', requestPasswordReset);
+router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
 
 export default router;

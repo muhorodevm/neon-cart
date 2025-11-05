@@ -1,0 +1,347 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  FACEBOOK
+  GITHUB
+  APPLE
+}
+
+enum AppRole {
+  CUSTOMER
+  ADMIN
+  SUPER_ADMIN
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  passwordHash  String?
+  provider      AuthProvider  @default(EMAIL)
+  providerId    String?
+  emailVerified Boolean       @default(false)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Relations
+  profile       Profile?
+  userRoles     UserRole[]
+  addresses     Address[]
+  orders        Order[]
+  cart          Cart?
+  wishlist      WishlistItem[]
+  reviews       Review[]
+  pageViews     PageView[]
+  productViews  ProductView[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String
+  role      AppRole
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, role])
+  @@index([userId])
+  @@map("user_roles")
+}
+
+// ============================================
+// PROFILE & ADDRESS MANAGEMENT
+// ============================================
+
+model Profile {
+  id         String    @id @default(uuid())
+  userId     String    @unique
+  firstName  String?
+  lastName   String?
+  phone      String?
+  avatarUrl  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("profiles")
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  userId     String
+  street     String
+  city       String
+  state      String
+  postalCode String
+  country    String
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders Order[]
+  
+  @@index([userId])
+  @@map("addresses")
+}
+
+// ============================================
+// PRODUCT MANAGEMENT
+// ============================================
+
+enum Category {
+  MEN
+  WOMEN
+  KIDS
+  ACCESSORIES
+}
+
+enum Subcategory {
+  SHIRTS
+  PANTS
+  DRESSES
+  SHOES
+  BAGS
+  WATCHES
+  JACKETS
+  SWEATERS
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  category    String
+  subcategory String?
+  sizes       String[]
+  colors      String[]
+  images      String[]
+  stock       Int         @default(0)
+  brand       String?
+  featured    Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Relations
+  orderItems   OrderItem[]
+  cartItems    CartItem[]
+  wishlistItems WishlistItem[]
+  reviews      Review[]
+  productViews ProductView[]
+  
+  @@index([category])
+  @@index([featured])
+  @@map("products")
+}
+
+// ============================================
+// SHOPPING CART & WISHLIST
+// ============================================
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+  
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  size      String?
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([cartId, productId, size, color])
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId])
+  @@index([userId])
+  @@map("wishlist_items")
+}
+
+// ============================================
+// ORDER MANAGEMENT
+// ============================================
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  MPESA
+  CARD
+  CASH_ON_DELIVERY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id            String        @id @default(uuid())
+  orderNumber   String        @unique
+  userId        String
+  addressId     String
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+  subtotal      Float
+  tax           Float         @default(0)
+  shipping      Float         @default(0)
+  total         Float
+  receiptUrl    String?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  user     User        @relation(fields: [userId], references: [id])
+  address  Address     @relation(fields: [addressId], references: [id])
+  items    OrderItem[]
+  payments Payment[]
+  
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  size      String?
+  color     String?
+  price     Float
+  createdAt DateTime @default(now())
+  
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+  
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// ============================================
+// PAYMENT RECORDS
+// ============================================
+
+model Payment {
+  id                 String        @id @default(uuid())
+  orderId            String
+  transactionId      String        @unique
+  paymentMethod      PaymentMethod
+  amount             Float
+  status             PaymentStatus @default(PENDING)
+  mpesaReceiptNumber String?
+  mpesaPhoneNumber   String?
+  metadata           Json?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@index([orderId])
+  @@index([transactionId])
+  @@map("payments")
+}
+
+// ============================================
+// PRODUCT REVIEWS
+// ============================================
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId])
+  @@index([productId])
+  @@map("reviews")
+}
+
+// ============================================
+// ANALYTICS & TRACKING
+// ============================================
+
+model PageView {
+  id        String   @id @default(uuid())
+  userId    String?
+  path      String
+  createdAt DateTime @default(now())
+  
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@index([path])
+  @@index([createdAt])
+  @@map("page_views")
+}
+
+model ProductView {
+  id        String   @id @default(uuid())
+  userId    String?
+  productId String
+  createdAt DateTime @default(now())
+  
+  user    User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@index([productId])
+  @@index([createdAt])
+  @@map("product_views")
+}
