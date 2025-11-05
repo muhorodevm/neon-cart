@@ -232,6 +232,7 @@ model Order {
   addressId     String
   status        OrderStatus   @default(PENDING)
   paymentMethod PaymentMethod
+  mpesaPhoneNumber String
   paymentStatus PaymentStatus @default(PENDING)
   subtotal      Float
   tax           Float         @default(0)

@@ -1,10 +1,10 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface User {
   id: string;
   email: string;
-  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  role: "USER" | "ADMIN" | "SUPER_ADMIN";
   profile?: {
     firstName: string;
     lastName: string;
@@ -17,10 +17,10 @@ interface AuthState {
   token: string | null;
   user: User | null;
   isAuthenticated: boolean;
-  isAdmin: boolean;
+  role: "USER" | "ADMIN" | "SUPER_ADMIN" | null;
   login: (token: string, user: User) => void;
   logout: () => void;
-  updateUser: (user: User) => void;
+  updateUser: (user: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -29,46 +29,45 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
       isAuthenticated: false,
-      isAdmin: false,
+      role: null,
 
-      login: (token: string, user: User) => {
-        const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
-        
-        // Store in localStorage for API client
-        localStorage.setItem('authToken', token);
-        if (isAdmin) {
-          localStorage.setItem('adminAuth', token);
-          localStorage.setItem('userRole', user.role);
-        }
-        
+      login: (token, user) => {
+        const role = user.role;
         set({
           token,
           user,
           isAuthenticated: true,
-          isAdmin,
+          role,
         });
+
+        // Optional: safely set in localStorage if needed by API client
+        if (typeof window !== "undefined") {
+          localStorage.setItem("authToken", token);
+          localStorage.setItem("userRole", role);
+        }
       },
 
       logout: () => {
-        // Clear localStorage
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('adminAuth');
-        localStorage.removeItem('userRole');
-        
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("userRole");
+        }
+
         set({
           token: null,
           user: null,
           isAuthenticated: false,
-          isAdmin: false,
+          role: null,
         });
       },
 
-      updateUser: (user: User) => {
-        set({ user });
-      },
+      updateUser: (userUpdates) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...userUpdates } : null,
+        })),
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage", // key in localStorage
     }
   )
 );
