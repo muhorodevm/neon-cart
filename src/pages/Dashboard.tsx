@@ -8,7 +8,7 @@ import ProfileForm from '@/components/forms/ProfileForm';
 import AddressForm from '@/components/forms/AddressForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Receipt from '@/components/dashboard/Receipt';
-import DashboardAnalytics from './dashboard/DashboardAnalytics';
+
 import { useToast } from '@/hooks/use-toast';
 
 const Dashboard = () => {
@@ -58,7 +58,6 @@ const Dashboard = () => {
     { title: 'Orders', icon: Package, section: 'orders' },
     { title: 'Profile', icon: User, section: 'profile' },
     { title: 'Addresses', icon: MapPin, section: 'addresses' },
-    { title: 'Analytics', icon: BarChart3, section: 'analytics' },
   ];
 
   const getStatusColor = (status: string) => {
@@ -334,7 +333,7 @@ const Dashboard = () => {
               </div>
             )}
 
-            {activeSection === 'analytics' && <DashboardAnalytics />}
+            
           </div>
         </main>
       </div>

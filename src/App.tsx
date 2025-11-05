@@ -24,6 +24,7 @@ import AdminOverview from "./pages/admin/AdminOverview";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminOrderDetails from "./pages/AdminOrderDetails";
 import NotFound from "./pages/NotFound";
 
@@ -58,6 +59,7 @@ const App = () => (
           <Route path="/admin/orders" element={<RouteProtection requireAdmin><AdminLayout><AdminOrders /></AdminLayout></RouteProtection>} />
           <Route path="/admin/orders/:orderId" element={<RouteProtection requireAdmin><AdminLayout><AdminOrderDetails /></AdminLayout></RouteProtection>} />
           <Route path="/admin/customers" element={<RouteProtection requireAdmin><AdminLayout><AdminCustomers /></AdminLayout></RouteProtection>} />
+          <Route path="/admin/analytics" element={<RouteProtection requireAdmin><AdminLayout><AdminAnalytics /></AdminLayout></RouteProtection>} />
           
           {/* 404 */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
