@@ -1,93 +1,134 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Package, Truck, CreditCard, User, MapPin, Download, BarChart3, Edit, Trash2 } from 'lucide-react';
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import ProfileForm from '@/components/forms/ProfileForm';
-import AddressForm from '@/components/forms/AddressForm';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import Receipt from '@/components/dashboard/Receipt';
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Package,
+  Truck,
+  CreditCard,
+  User,
+  MapPin,
+  Download,
+  BarChart3,
+  Edit,
+  Trash2,
+} from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import ProfileForm from "@/components/forms/ProfileForm";
+import AddressForm from "@/components/forms/AddressForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import Receipt from "@/components/dashboard/Receipt";
 
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
+import DashboardProfile from "./dashboard/DashboardProfile";
+import DashboardOrders from "./dashboard/DashboardOrders";
 
 const Dashboard = () => {
   const { toast } = useToast();
-  const [activeSection, setActiveSection] = useState('orders');
+  const [activeSection, setActiveSection] = useState("orders");
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [selectedOrderForReceipt, setSelectedOrderForReceipt] = useState<any>(null);
+  const [selectedOrderForReceipt, setSelectedOrderForReceipt] =
+    useState<any>(null);
   const [editingAddress, setEditingAddress] = useState<any>(null);
 
   const orders = [
     {
-      id: 'ORD-001',
-      date: '2024-01-15',
-      status: 'delivered',
+      id: "ORD-001",
+      date: "2024-01-15",
+      status: "delivered",
       total: 17000,
-      items: [{ name: 'Air Jordan 1 Retro High OG', quantity: 1, price: 17000 }]
+      items: [
+        { name: "Air Jordan 1 Retro High OG", quantity: 1, price: 17000 },
+      ],
     },
     {
-      id: 'ORD-002',
-      date: '2024-01-20',
-      status: 'shipping',
+      id: "ORD-002",
+      date: "2024-01-20",
+      status: "shipping",
       total: 22000,
-      items: [{ name: 'Nike Air Max 90', quantity: 1, price: 12000 }, { name: 'Nike Dunk Low', quantity: 1, price: 10000 }]
+      items: [
+        { name: "Nike Air Max 90", quantity: 1, price: 12000 },
+        { name: "Nike Dunk Low", quantity: 1, price: 10000 },
+      ],
     },
     {
-      id: 'ORD-003',
-      date: '2024-01-25',
-      status: 'processing',
+      id: "ORD-003",
+      date: "2024-01-25",
+      status: "processing",
       total: 9000,
-      items: [{ name: 'Air Force 1 \'07', quantity: 1, price: 9000 }]
-    }
+      items: [{ name: "Air Force 1 '07", quantity: 1, price: 9000 }],
+    },
   ];
 
   const addresses = [
     {
       id: 1,
-      label: 'Home Address',
-      street: '123 Main Street',
-      city: 'Nairobi',
-      postalCode: '00100',
-      country: 'Kenya',
-      isDefault: true
-    }
+      label: "Home Address",
+      street: "123 Main Street",
+      city: "Nairobi",
+      postalCode: "00100",
+      country: "Kenya",
+      isDefault: true,
+    },
   ];
 
   const menuItems = [
-    { title: 'Orders', icon: Package, section: 'orders' },
-    { title: 'Profile', icon: User, section: 'profile' },
-    { title: 'Addresses', icon: MapPin, section: 'addresses' },
+    { title: "Orders", icon: Package, section: "orders" },
+    { title: "Profile", icon: User, section: "profile" },
+    { title: "Addresses", icon: MapPin, section: "addresses" },
   ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'delivered': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'shipping': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'processing': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      default: return 'bg-muted text-muted-foreground';
+      case "delivered":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "shipping":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      case "processing":
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+      default:
+        return "bg-muted text-muted-foreground";
     }
   };
 
   const handleProfileUpdate = (data: any) => {
-    console.log('Profile updated:', data);
+    console.log("Profile updated:", data);
   };
 
   const handleAddressSubmit = (data: any) => {
-    console.log('Address submitted:', data);
+    console.log("Address submitted:", data);
     setShowAddressForm(false);
     setEditingAddress(null);
     toast({
-      title: editingAddress ? 'Address Updated' : 'Address Added',
-      description: editingAddress ? 'Your address has been updated successfully' : 'New address has been added successfully',
+      title: editingAddress ? "Address Updated" : "Address Added",
+      description: editingAddress
+        ? "Your address has been updated successfully"
+        : "New address has been added successfully",
     });
   };
 
   const handleDeleteAddress = (id: number) => {
-    console.log('Delete address:', id);
+    console.log("Delete address:", id);
     toast({
-      title: 'Address Deleted',
-      description: 'Address has been removed successfully',
+      title: "Address Deleted",
+      description: "Address has been removed successfully",
     });
   };
 
@@ -107,7 +148,9 @@ const Dashboard = () => {
                     <SidebarMenuItem key={item.section}>
                       <SidebarMenuButton
                         onClick={() => setActiveSection(item.section)}
-                        className={activeSection === item.section ? 'bg-muted' : ''}
+                        className={
+                          activeSection === item.section ? "bg-muted" : ""
+                        }
                       >
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
@@ -127,32 +170,38 @@ const Dashboard = () => {
           </header>
 
           <div className="p-6">
-            {activeSection === 'orders' && (
+            {/* {activeSection === "orders" && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Total Orders
+                      </CardTitle>
                       <Package className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">12</div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">In Transit</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        In Transit
+                      </CardTitle>
                       <Truck className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">2</div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
+                      <CardTitle className="text-sm font-medium">
+                        Total Spent
+                      </CardTitle>
                       <CreditCard className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -174,7 +223,9 @@ const Dashboard = () => {
                                 {order.status}
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground">{order.date}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {order.date}
+                            </p>
                             <div className="space-y-1">
                               {order.items.map((item, index) => (
                                 <p key={index} className="text-sm">
@@ -184,26 +235,30 @@ const Dashboard = () => {
                             </div>
                           </div>
                           <div className="text-right space-y-2">
-                            <p className="text-lg font-semibold">KES {order.total.toLocaleString()}</p>
+                            <p className="text-lg font-semibold">
+                              KES {order.total.toLocaleString()}
+                            </p>
                             <div className="flex gap-2">
                               <Button variant="outline" size="sm">
                                 Track Order
                               </Button>
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button 
-                                    variant="outline" 
+                                  <Button
+                                    variant="outline"
                                     size="sm"
-                                    onClick={() => setSelectedOrderForReceipt({
-                                      orderId: order.id,
-                                      date: order.date,
-                                      items: order.items,
-                                      subtotal: order.total,
-                                      total: order.total,
-                                      customerName: 'John Doe',
-                                      customerEmail: 'john.doe@example.com',
-                                      customerPhone: '+254 712 345 678'
-                                    })}
+                                    onClick={() =>
+                                      setSelectedOrderForReceipt({
+                                        orderId: order.id,
+                                        date: order.date,
+                                        items: order.items,
+                                        subtotal: order.total,
+                                        total: order.total,
+                                        customerName: "John Doe",
+                                        customerEmail: "john.doe@example.com",
+                                        customerPhone: "+254 712 345 678",
+                                      })
+                                    }
                                   >
                                     <Download className="h-4 w-4 mr-1" />
                                     Receipt
@@ -214,18 +269,24 @@ const Dashboard = () => {
                                     <DialogTitle>Order Receipt</DialogTitle>
                                   </DialogHeader>
                                   {selectedOrderForReceipt && (
-                                    <Receipt 
-                                      orderNumber={selectedOrderForReceipt.orderId}
+                                    <Receipt
+                                      orderNumber={
+                                        selectedOrderForReceipt.orderId
+                                      }
                                       date={selectedOrderForReceipt.date}
                                       items={selectedOrderForReceipt.items}
-                                      subtotal={selectedOrderForReceipt.subtotal}
+                                      subtotal={
+                                        selectedOrderForReceipt.subtotal
+                                      }
                                       tax={0}
                                       total={selectedOrderForReceipt.total}
                                       customerInfo={{
                                         name: selectedOrderForReceipt.customerName,
-                                        email: selectedOrderForReceipt.customerEmail,
-                                        phone: selectedOrderForReceipt.customerPhone,
-                                        address: '123 Main Street, Nairobi'
+                                        email:
+                                          selectedOrderForReceipt.customerEmail,
+                                        phone:
+                                          selectedOrderForReceipt.customerPhone,
+                                        address: "123 Main Street, Nairobi",
                                       }}
                                       paymentMethod="M-Pesa"
                                     />
@@ -240,9 +301,10 @@ const Dashboard = () => {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
+            <DashboardOrders />
 
-            {activeSection === 'profile' && (
+            {/* {activeSection === 'profile' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -262,19 +324,27 @@ const Dashboard = () => {
                   />
                 </CardContent>
               </Card>
-            )}
+            )} */}
+            <DashboardProfile />
 
-            {activeSection === 'addresses' && (
+            {activeSection === "addresses" && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h2 className="text-xl font-semibold">Saved Addresses</h2>
-                  <Dialog open={showAddressForm} onOpenChange={setShowAddressForm}>
+                  <Dialog
+                    open={showAddressForm}
+                    onOpenChange={setShowAddressForm}
+                  >
                     <DialogTrigger asChild>
-                      <Button onClick={() => setEditingAddress(null)}>Add New Address</Button>
+                      <Button onClick={() => setEditingAddress(null)}>
+                        Add New Address
+                      </Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>{editingAddress ? 'Edit Address' : 'Add New Address'}</DialogTitle>
+                        <DialogTitle>
+                          {editingAddress ? "Edit Address" : "Add New Address"}
+                        </DialogTitle>
                       </DialogHeader>
                       <AddressForm
                         initialData={editingAddress}
@@ -299,14 +369,16 @@ const Dashboard = () => {
                               {address.isDefault && <Badge>Default</Badge>}
                             </h4>
                             <p className="text-sm text-muted-foreground mt-2">
-                              {address.street}<br />
-                              {address.city}, {address.postalCode}<br />
+                              {address.street}
+                              <br />
+                              {address.city}, {address.postalCode}
+                              <br />
                               {address.country}
                             </p>
                           </div>
                           <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => {
                                 setEditingAddress(address);
@@ -316,8 +388,8 @@ const Dashboard = () => {
                               <Edit className="h-4 w-4 mr-1" />
                               Edit
                             </Button>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => handleDeleteAddress(address.id)}
                             >
@@ -332,8 +404,6 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
-
-            
           </div>
         </main>
       </div>

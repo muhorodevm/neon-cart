@@ -1,35 +1,67 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Download, Eye } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Eye } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Receipt from "@/components/dashboard/Receipt";
+import { useQuery } from "@tanstack/react-query";
+import { orderApi } from "@/lib/api";
+
+type OrderItem = {
+  name: string;
+  size: string;
+  quantity: number;
+  price: number;
+};
+
+type Order = {
+  id: string;
+  orderNumber: string;
+  createdAt: string;
+  total: number;
+  subtotal: number;
+  tax: number;
+  status: string;
+  items: OrderItem[];
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+  };
+  paymentMethod: string;
+};
 
 const DashboardOrders = () => {
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const orders = [
-    {
-      id: "ORD-2024-001",
-      date: "2024-01-15",
-      total: "KSh 15,995",
-      status: "DELIVERED",
-      items: [
-        { name: "Air Max 270", size: "42", quantity: 1, price: 15995 }
-      ],
+  // Fetch orders using React Query
+  const {
+    data: orders = [],
+    isLoading,
+    isError,
+  } = useQuery<Order[]>({
+    queryKey: ["userOrders"],
+    queryFn: async () => {
+      const response = await orderApi.getMyOrders();
+      // return only the orders array (assert response shape)
+      return (response as { data: { orders: Order[] } }).data.orders;
     },
-    {
-      id: "ORD-2024-002",
-      date: "2024-01-16",
-      total: "KSh 24,998",
-      status: "SHIPPED",
-      items: [
-        { name: "React Infinity", size: "38", quantity: 2, price: 12499 }
-      ],
-    },
-  ];
+  });
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -42,6 +74,9 @@ const DashboardOrders = () => {
     return colors[status] || "bg-gray-500";
   };
 
+  if (isLoading) return <p>Loading orders...</p>;
+  if (isError) return <p>Failed to load orders.</p>;
+
   return (
     <>
       <Card>
@@ -52,7 +87,7 @@ const DashboardOrders = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order ID</TableHead>
+                <TableHead>Order Number</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
@@ -62,9 +97,13 @@ const DashboardOrders = () => {
             <TableBody>
               {orders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>{order.date}</TableCell>
-                  <TableCell>{order.total}</TableCell>
+                  <TableCell className="font-medium">
+                    {order.orderNumber}
+                  </TableCell>
+                  <TableCell>
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>KSh {order.total.toLocaleString()}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(order.status)}>
                       {order.status}
@@ -89,26 +128,26 @@ const DashboardOrders = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
+      {/* Order Receipt Dialog */}
+      <Dialog
+        open={!!selectedOrder}
+        onOpenChange={() => setSelectedOrder(null)}
+      >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Order Receipt</DialogTitle>
           </DialogHeader>
+
           {selectedOrder && (
             <Receipt
-              orderNumber={selectedOrder.id}
-              date={selectedOrder.date}
+              orderNumber={selectedOrder.orderNumber}
+              date={new Date(selectedOrder.createdAt).toLocaleDateString()}
               items={selectedOrder.items}
-              subtotal={15995}
-              tax={2559}
-              total={18554}
-              customerInfo={{
-                name: "John Doe",
-                email: "john@example.com",
-                phone: "+254 712 345 678",
-                address: "Nairobi, Kenya"
-              }}
-              paymentMethod="M-PESA"
+              subtotal={selectedOrder.subtotal}
+              tax={selectedOrder.tax}
+              total={selectedOrder.total}
+              customerInfo={selectedOrder.customer}
+              paymentMethod={selectedOrder.paymentMethod}
             />
           )}
         </DialogContent>

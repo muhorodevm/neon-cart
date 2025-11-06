@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Eye, EyeOff } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { authApi } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const loginStore = useAuthStore((state) => state.login);
 
   // ✅ React Query mutation for login
   const loginMutation = useMutation({
@@ -25,10 +27,15 @@ const Login = () => {
       if (data?.token) {
         localStorage.setItem("authToken", data.token);
       }
-      
+
       if (data?.user) {
         localStorage.setItem("userAuth", "true");
-        localStorage.setItem("userRole", data.user.roles?.[0]?.role || "CUSTOMER");
+        localStorage.setItem(
+          "userRole",
+          data.user.roles?.[0]?.role || "CUSTOMER"
+        );
+        localStorage.setItem("user", JSON.stringify(data.user));
+        loginStore(data.token, data.user);
       }
 
       // Redirect to dashboard or home page

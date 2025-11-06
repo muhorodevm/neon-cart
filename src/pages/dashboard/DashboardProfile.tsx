@@ -1,26 +1,29 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { User, Edit, X, Save } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { User, Edit, X, Save } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuthStore } from "@/store/authStore";
 
 const DashboardProfile = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
+  const { user } = useAuthStore();
+  console.log("User from store:", user);
   const [profile, setProfile] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+254 712 345 678',
+    firstName: user?.profile.firstName,
+    lastName: user?.profile.lastName,
+    email: user?.email,
+    phone: user?.profile.phone,
   });
 
   const handleSave = () => {
     setIsEditing(false);
     toast({
-      title: 'Profile Updated',
-      description: 'Your profile information has been updated successfully',
+      title: "Profile Updated",
+      description: "Your profile information has been updated successfully",
     });
   };
 
@@ -48,18 +51,11 @@ const DashboardProfile = () => {
               </Button>
             ) : (
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                >
+                <Button variant="outline" size="sm" onClick={handleCancel}>
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                >
+                <Button size="sm" onClick={handleSave}>
                   <Save className="h-4 w-4 mr-2" />
                   Save
                 </Button>
@@ -79,7 +75,7 @@ const DashboardProfile = () => {
                     setProfile({ ...profile, firstName: e.target.value })
                   }
                   disabled={!isEditing}
-                  className={!isEditing ? 'cursor-not-allowed opacity-60' : ''}
+                  className={!isEditing ? "cursor-not-allowed opacity-60" : ""}
                 />
               </div>
 
@@ -92,7 +88,7 @@ const DashboardProfile = () => {
                     setProfile({ ...profile, lastName: e.target.value })
                   }
                   disabled={!isEditing}
-                  className={!isEditing ? 'cursor-not-allowed opacity-60' : ''}
+                  className={!isEditing ? "cursor-not-allowed opacity-60" : ""}
                 />
               </div>
             </div>
@@ -107,7 +103,7 @@ const DashboardProfile = () => {
                   setProfile({ ...profile, email: e.target.value })
                 }
                 disabled={!isEditing}
-                className={!isEditing ? 'cursor-not-allowed opacity-60' : ''}
+                className={!isEditing ? "cursor-not-allowed opacity-60" : ""}
               />
             </div>
 
@@ -120,7 +116,7 @@ const DashboardProfile = () => {
                   setProfile({ ...profile, phone: e.target.value })
                 }
                 disabled={!isEditing}
-                className={!isEditing ? 'cursor-not-allowed opacity-60' : ''}
+                className={!isEditing ? "cursor-not-allowed opacity-60" : ""}
               />
             </div>
           </div>
