@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X } from 'lucide-react';
+import { productApi } from '@/lib/api';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters'),
@@ -19,6 +20,7 @@ const productSchema = z.object({
   stock: z.string().refine((val) => !isNaN(Number(val)) && Number(val) >= 0, 'Stock must be a non-negative number'),
   sizes: z.string().min(1, 'Please provide available sizes (e.g., 40,41,42)'),
   image: z.string().min(1, 'Please provide an image'),
+  colors: z.string().min(1, 'Please provide available colors (e.g., Black,Blue,White)'),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -43,19 +45,31 @@ const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
       stock: '',
       sizes: '',
       image: '',
+      colors: '',
     },
   });
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setImagePreview(result);
-        form.setValue('image', result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const res = await productApi.uploadImage(file);
+        const url = (res as { data: { url?: string; urlPath?: string; filePath?: string } }).data.url ||
+          (res as any).data.urlPath || (res as any).data.filePath;
+        if (url) {
+          setImagePreview(url);
+          form.setValue('image', url);
+        }
+      } catch {
+        // fallback to preview only
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          setImagePreview(result);
+          form.setValue('image', result);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -65,7 +79,18 @@ const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
   };
 
   const handleSubmit = (data: ProductFormValues) => {
-    onSubmit(data);
+    const payload: any = {
+      name: data.name,
+      price: Number(data.price),
+      category: data.category.toUpperCase(),
+      subcategory: data.subcategory,
+      description: data.description,
+      stock: Number(data.stock),
+      sizes: data.sizes.split(',').map((s) => s.trim()).filter(Boolean),
+      colors: data.colors.split(',').map((c) => c.trim()).filter(Boolean),
+      images: [data.image],
+    };
+    onSubmit(payload);
     toast({
       title: 'Success',
       description: initialData ? 'Product updated successfully' : 'Product added successfully',
@@ -183,6 +208,20 @@ const ProductForm = ({ onSubmit, initialData }: ProductFormProps) => {
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="colors"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Available Colors</FormLabel>
+              <FormControl>
+                <Input placeholder="Black,Blue,White" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <FormField
           control={form.control}

@@ -1,29 +1,29 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { useQuery } from "@tanstack/react-query";
+import { adminApi } from "@/lib/api";
 
 const AdminAnalytics = () => {
-  const monthlyRevenue = [
-    { month: 'Jan', revenue: 45000 },
-    { month: 'Feb', revenue: 52000 },
-    { month: 'Mar', revenue: 48000 },
-    { month: 'Apr', revenue: 61000 },
-    { month: 'May', revenue: 55000 },
-    { month: 'Jun', revenue: 67000 },
-  ];
+  const { data } = useQuery({
+    queryKey: ["adminStats"],
+    queryFn: async () => {
+      const res = await adminApi.getDashboardStats();
+      return (res as { data: { stats: any } }).data.stats;
+    },
+    refetchInterval: 30000,
+  });
 
-  const categoryData = [
-    { name: 'Men', value: 45, color: 'hsl(var(--chart-1))' },
-    { name: 'Women', value: 35, color: 'hsl(var(--chart-2))' },
-    { name: 'Kids', value: 20, color: 'hsl(var(--chart-3))' },
-  ];
-
-  const topProducts = [
-    { name: 'Air Jordan 1', sales: 234, revenue: 3978000 },
-    { name: 'Nike Air Max 90', sales: 198, revenue: 2376000 },
-    { name: 'Nike Dunk Low', sales: 176, revenue: 1760000 },
-    { name: 'Air Force 1', sales: 165, revenue: 1485000 },
-    { name: 'Yeezy Boost 350', sales: 143, revenue: 3146000 },
-  ];
+  const revenueByCategory = data?.revenueByCategory || {};
+  const categoryData = Object.keys(revenueByCategory).map((k, i) => ({
+    name: k,
+    value: revenueByCategory[k],
+    color: `hsl(var(--chart-${(i % 5) + 1}))`,
+  }));
+  const topProducts = (data?.topProducts || []).map((tp: any) => ({
+    name: tp.product?.name || 'Product',
+    sales: tp.totalSold || 0,
+    revenue: 0,
+  }));
 
   return (
     <div className="space-y-6">

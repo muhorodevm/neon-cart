@@ -9,7 +9,7 @@ const AdminOrderDetails = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
 
-  // Mock order data - replace with actual data fetching
+  // TODO: replace with actual data fetching
   const order = {
     id: orderId,
     orderNumber: "ORD-2024-006",
@@ -47,6 +47,7 @@ const AdminOrderDetails = () => {
     tax: 6720,
     shippingCost: 500,
     total: 49220,
+    receiptUrl: undefined as string | undefined,
   };
 
   const handleDownloadPDF = () => {
@@ -85,6 +86,14 @@ const AdminOrderDetails = () => {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {order.receiptUrl && (
+            <div className="mb-6">
+              <h3 className="font-semibold text-lg mb-4">Receipt</h3>
+              <div className="h-[70vh] border rounded">
+                <iframe src={order.receiptUrl} title="Receipt" className="w-full h-full border-none" />
+              </div>
+            </div>
+          )}
           {/* Order Status */}
           <div className="flex justify-between items-center">
             <div>

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { adminAuthApi } from "@/lib/api";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -17,27 +18,18 @@ const AdminLogin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      // Mock admin check
-      if (email === "admin@ndula.com" && password === "admin123") {
-        localStorage.setItem("adminAuth", "true");
-        localStorage.setItem("userRole", "admin");
-        toast({
-          title: "Login Successful",
-          description: "Welcome back, Admin!",
-        });
-        navigate("/admin/overview");
-      } else {
-        toast({
-          title: "Login Failed",
-          description: "Invalid admin credentials",
-          variant: "destructive",
-        });
-      }
+    try {
+      const response = await adminAuthApi.login({ email, password });
+      const { token } = (response as { data: { token: string } }).data;
+      localStorage.setItem("adminAuth", token);
+      localStorage.setItem("userRole", "admin");
+      toast({ title: "Login Successful", description: "Welcome back, Admin!" });
+      navigate("/admin/overview");
+    } catch (error: any) {
+      toast({ title: "Login Failed", description: error?.response?.data?.error || "Invalid credentials", variant: "destructive" });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

@@ -71,10 +71,10 @@ const Receipt = ({ orderNumber, date, items, subtotal, tax, total, customerInfo,
         <div>
           <h3 className="font-semibold mb-3">Customer Information</h3>
           <div className="space-y-2 text-sm">
-            <p><span className="font-medium">Name:</span> {customerInfo.name}</p>
-            <p><span className="font-medium">Email:</span> {customerInfo.email}</p>
-            <p><span className="font-medium">Phone:</span> {customerInfo.phone}</p>
-            <p><span className="font-medium">Address:</span> {customerInfo.address}</p>
+            <p><span className="font-medium">Name:</span> {customerInfo?.name || 'Customer'}</p>
+            <p><span className="font-medium">Email:</span> {customerInfo?.email || 'N/A'}</p>
+            <p><span className="font-medium">Phone:</span> {customerInfo?.phone || 'N/A'}</p>
+            <p><span className="font-medium">Address:</span> {customerInfo?.address || 'N/A'}</p>
           </div>
         </div>
 

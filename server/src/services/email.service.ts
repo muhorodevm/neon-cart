@@ -15,7 +15,7 @@ export async function sendSignupEmail(email: string, name: string, otp: string) 
   }
 }
 
-export async function sendOrderConfirmationEmail(email: string, name: string, orderNumber: string, total: number) {
+export async function sendOrderConfirmationEmail(email: string, name: string, orderNumber: string, total: number, attachmentPath?: string) {
   try {
     const { subject, html } = emailTemplates.orderPlaced(name, orderNumber, total.toString());
     await transporter.sendMail({
@@ -23,6 +23,7 @@ export async function sendOrderConfirmationEmail(email: string, name: string, or
       to: email,
       subject,
       html,
+      attachments: attachmentPath ? [{ filename: `${orderNumber}.pdf`, path: attachmentPath }] : undefined,
     });
   } catch (error) {
     console.error('Send order confirmation email error:', error);

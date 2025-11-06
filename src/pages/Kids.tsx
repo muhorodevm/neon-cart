@@ -15,14 +15,14 @@ const Kids = () => {
 
   useEffect(() => {
     const kidsProducts = products.filter(product => 
-      product.category === 'Kids'
+      product.category?.toUpperCase() === 'KIDS'
     );
     setFilteredProducts(kidsProducts);
   }, [products]);
 
   const handleFiltersChange = (filters: any) => {
     let filtered = products.filter(product => 
-      product.category === 'Kids'
+      product.category?.toUpperCase() === 'KIDS'
     );
 
     // Apply price filter

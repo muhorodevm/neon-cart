@@ -1,32 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Package, ShoppingCart, Users } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { adminApi } from "@/lib/api";
 
 const AdminOverview = () => {
+  const { data } = useQuery({
+    queryKey: ["adminStats"],
+    queryFn: async () => {
+      const response = await adminApi.getDashboardStats();
+      return (response as { data: any }).data;
+    },
+    refetchInterval: 30000,
+  });
+
   const stats = [
-    {
-      title: "Total Revenue",
-      value: "KSh 145,230",
-      icon: DollarSign,
-      change: "+12.5%",
-    },
-    {
-      title: "Orders",
-      value: "234",
-      icon: ShoppingCart,
-      change: "+8.2%",
-    },
-    {
-      title: "Products",
-      value: "89",
-      icon: Package,
-      change: "+3",
-    },
-    {
-      title: "Customers",
-      value: "1,429",
-      icon: Users,
-      change: "+18.7%",
-    },
+    { title: "Total Revenue", value: `KSh ${Number(data?.totalRevenue || 0).toLocaleString()}`, icon: DollarSign, change: data?.revenueChange || "" },
+    { title: "Orders", value: String(data?.totalOrders || 0), icon: ShoppingCart, change: data?.ordersChange || "" },
+    { title: "Products", value: String(data?.totalProducts || 0), icon: Package, change: "" },
+    { title: "Customers", value: String(data?.totalCustomers || 0), icon: Users, change: data?.customersChange || "" },
   ];
 
   return (

@@ -21,11 +21,11 @@ const AdminProducts = () => {
     queryKey: ['admin-products'],
     queryFn: async () => {
       const response = await productApi.getAll();
-      return response.data;
+      return (response as { data: { products: any[] } }).data.products;
     },
   });
 
-  const products = (productsData as any) || [];
+  const products = Array.isArray(productsData) ? productsData : [];
 
   // Create/Update product mutation
   const productMutation = useMutation({

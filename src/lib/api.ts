@@ -13,12 +13,21 @@ export const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("authToken");
+    const userToken = localStorage.getItem("authToken");
     const adminToken = localStorage.getItem("adminAuth");
 
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const url = config.url || "";
+    const isAdminEndpoint =
+      url.startsWith("/admin") ||
+      url.includes("/admin/") ||
+      url.includes("/orders/admin");
+
+    if (isAdminEndpoint && adminToken) {
+      config.headers.Authorization = `Bearer ${adminToken}`;
+    } else if (userToken) {
+      config.headers.Authorization = `Bearer ${userToken}`;
     } else if (adminToken) {
+      // Fallback: if only admin token exists
       config.headers.Authorization = `Bearer ${adminToken}`;
     }
 
@@ -76,7 +85,7 @@ export const adminAuthApi = {
 
 // User API
 export const userApi = {
-  getProfile: () => apiClient.get("/user/profile"),
+  getProfile: () => apiClient.get("/users/profile"),
 
   updateProfile: (data: {
     firstName: string;
@@ -84,14 +93,14 @@ export const userApi = {
     phone: string;
   }) => apiClient.put("/user/profile", data),
 
-  getAddresses: () => apiClient.get("/user/addresses"),
+  getAddresses: () => apiClient.get("/users/addresses"),
 
-  addAddress: (data: any) => apiClient.post("/user/addresses", data),
+  addAddress: (data: any) => apiClient.post("/users/addresses", data),
 
   updateAddress: (id: string, data: any) =>
-    apiClient.put(`/user/addresses/${id}`, data),
+    apiClient.put(`/users/addresses/${id}`, data),
 
-  deleteAddress: (id: string) => apiClient.delete(`/user/addresses/${id}`),
+  deleteAddress: (id: string) => apiClient.delete(`/users/addresses/${id}`),
 };
 
 // Product API

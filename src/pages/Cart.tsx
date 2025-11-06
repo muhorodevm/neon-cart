@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,6 +11,8 @@ import { Minus, Plus, Trash2, ShoppingBag, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import Receipt from '@/components/dashboard/Receipt';
 import { orderApi, paymentApi, userApi } from '@/lib/api';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AddressForm from '@/components/forms/AddressForm';
 
 const Cart = () => {
   const { items, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCartStore();
@@ -19,6 +21,26 @@ const Cart = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState<any>(null);
+  const [addresses, setAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | undefined>(undefined);
+  const [useNewAddress, setUseNewAddress] = useState(false);
+  const [newAddressData, setNewAddressData] = useState<any>(null);
+  
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await userApi.getAddresses();
+        const body = (res as { data: { addresses?: any[] } }).data;
+        const list = Array.isArray(body?.addresses) ? body.addresses : [];
+        setAddresses(list);
+        const def = list.find((a: any) => a.isDefault) || list[0];
+        setSelectedAddressId(def?.id);
+      } catch {
+        setAddresses([]);
+      }
+    };
+    if (isCheckoutOpen) load();
+  }, [isCheckoutOpen]);
 
   if (items.length === 0) {
     return (
@@ -53,20 +75,19 @@ const Cart = () => {
     setIsProcessing(true);
     
     try {
-      // Get user addresses (assuming user is logged in)
-      const addressResponse = await userApi.getAddresses();
-      const addresses = addressResponse.data as any[];
-      const defaultAddress = addresses.find((addr: any) => addr.isDefault) || addresses[0];
+      // Resolve address to use
+      const defaultAddress = !useNewAddress ? (addresses.find((addr: any) => addr.id === selectedAddressId)
+        || addresses.find((addr: any) => addr.isDefault)
+        || addresses[0]) : null;
 
       // Create order
-      const orderData = {
+      const orderData: any = {
         items: items.map(item => ({
-          productId: item.id,
+          productId: item.productId,
           quantity: item.quantity,
           size: item.size,
           price: item.price,
         })),
-        addressId: defaultAddress?.id,
         paymentMethod: 'MPESA',
         mpesaPhoneNumber: phoneNumber,
         subtotal,
@@ -75,8 +96,21 @@ const Cart = () => {
         total,
       };
 
+      if (useNewAddress && newAddressData) {
+        orderData.address = {
+          street: newAddressData.street,
+          city: newAddressData.city,
+          state: newAddressData.state,
+          postalCode: newAddressData.postalCode,
+          country: newAddressData.country,
+          isDefault: false,
+        };
+      } else {
+        orderData.addressId = defaultAddress?.id;
+      }
+
       const orderResponse = await orderApi.create(orderData);
-      const order = orderResponse.data as any;
+      const order = (orderResponse as { data: { order: any } }).data.order;
 
       toast.success('Order created! Initiating M-Pesa payment...');
 
@@ -86,73 +120,35 @@ const Cart = () => {
         phoneNumber,
         amount: total,
       });
-      const paymentData = paymentResponse.data as any;
-
-      toast.success('M-Pesa payment initiated! Check your phone for the payment prompt.');
-
-      // Poll for payment status
-      let attempts = 0;
-      const maxAttempts = 20;
-      
-      const checkPaymentStatus = async () => {
-        try {
-          const statusResponse = await paymentApi.getPaymentStatus(paymentData.transactionId);
-          const paymentStatus = statusResponse.data as any;
-          
-          if (paymentStatus.status === 'COMPLETED') {
-            const receipt = {
-              orderNumber: order.orderNumber,
-              date: new Date().toLocaleDateString(),
-              items: items.map(item => ({
-                name: item.name,
-                quantity: item.quantity,
-                price: item.price * item.quantity,
-              })),
-              subtotal,
-              tax,
-              shipping,
-              total,
-              customerInfo: {
-                name: defaultAddress?.label || 'Customer',
-                email: 'customer@example.com',
-                phone: phoneNumber,
-                address: `${defaultAddress?.street}, ${defaultAddress?.city}, ${defaultAddress?.country}`,
-              },
-              paymentMethod: 'M-Pesa',
-              paymentCode: paymentStatus.mpesaReceiptNumber,
-            };
-
-            setReceiptData(receipt);
-            setIsProcessing(false);
-            setIsCheckoutOpen(false);
-            toast.success('Payment successful! Your order has been placed.');
-            clearCart();
-            setPhoneNumber('');
-            setShowReceipt(true);
-          } else if (paymentStatus.status === 'FAILED') {
-            setIsProcessing(false);
-            toast.error('Payment failed. Please try again.');
-          } else if (attempts < maxAttempts) {
-            attempts++;
-            setTimeout(checkPaymentStatus, 3000);
-          } else {
-            setIsProcessing(false);
-            toast.error('Payment timeout. Please check your order status.');
-          }
-        } catch (error) {
-          console.error('Error checking payment status:', error);
-          if (attempts < maxAttempts) {
-            attempts++;
-            setTimeout(checkPaymentStatus, 3000);
-          } else {
-            setIsProcessing(false);
-            toast.error('Unable to verify payment. Please contact support.');
-          }
-        }
+      const payment = (paymentResponse as { data: { payment: { mpesaReceiptNumber: string } } }).data.payment;
+      const receipt = {
+        orderNumber: order.orderNumber,
+        date: new Date().toLocaleDateString(),
+        items: items.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price * item.quantity,
+        })),
+        subtotal,
+        tax,
+        shipping,
+        total,
+        customerInfo: {
+          name: 'Customer',
+          email: 'customer@example.com',
+          phone: phoneNumber,
+          address: `${defaultAddress?.street}, ${defaultAddress?.city}${defaultAddress?.state ? ', ' + defaultAddress.state : ''}, ${defaultAddress?.country}`,
+        },
+        paymentMethod: 'M-Pesa',
+        paymentCode: payment?.mpesaReceiptNumber,
       };
-
-      // Start checking payment status after 5 seconds
-      setTimeout(checkPaymentStatus, 5000);
+      setReceiptData(receipt);
+      setIsProcessing(false);
+      setIsCheckoutOpen(false);
+      toast.success('Payment successful! Your order has been placed.');
+      clearCart();
+      setPhoneNumber('');
+      setShowReceipt(true);
       
     } catch (error: any) {
       console.error('Checkout error:', error);
@@ -288,7 +284,7 @@ const Cart = () => {
 
       {/* M-Pesa Checkout Dialog */}
       <Dialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Smartphone className="h-5 w-5 text-green-600" />
@@ -300,6 +296,40 @@ const Cart = () => {
           </DialogHeader>
           
           <div className="space-y-4 py-4">
+            {/* Address Selector */}
+            <div className="space-y-2">
+              <Label>Shipping Address</Label>
+              {!useNewAddress && (
+              <Select value={selectedAddressId} onValueChange={setSelectedAddressId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={addresses.length ? 'Select address' : 'No addresses found'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {addresses.map((addr: any) => (
+                    <SelectItem key={addr.id} value={addr.id}>
+                      {addr.street}, {addr.city}{addr.state ? `, ${addr.state}` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              )}
+              <div className="flex items-center justify-between">
+                <Label className="text-sm">Use new address</Label>
+                <Button variant="outline" size="sm" onClick={() => setUseNewAddress((v) => !v)}>
+                  {useNewAddress ? 'Use saved' : 'Add new'}
+                </Button>
+              </div>
+              {useNewAddress && (
+                <div className="mt-2 border rounded p-2">
+                  <AddressForm
+                    initialData={newAddressData || undefined}
+                    onSubmit={(data) => setNewAddressData(data)}
+                    onCancel={() => setUseNewAddress(false)}
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <Input

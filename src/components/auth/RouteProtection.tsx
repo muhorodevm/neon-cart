@@ -10,16 +10,16 @@ export const RouteProtection = ({ children, requireAdmin = false }: RouteProtect
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("userAuth") === "true";
-    const isAdmin = localStorage.getItem("userRole") === "admin";
-    const hasAdminAuth = localStorage.getItem("adminAuth") === "true";
+    const userToken = localStorage.getItem("authToken");
+    const adminToken = localStorage.getItem("adminAuth");
+    const isAdminRole = localStorage.getItem("userRole") === "admin";
 
     if (requireAdmin) {
-      if (!hasAdminAuth || !isAdmin) {
+      if (!adminToken || !isAdminRole) {
         navigate("/admin/login");
       }
     } else {
-      if (!isAuthenticated) {
+      if (!userToken) {
         navigate("/login");
       }
     }

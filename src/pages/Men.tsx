@@ -1,51 +1,54 @@
-import { useEffect, useState } from 'react';
-import { useProductStore } from '@/store/productStore';
-import ProductCard from '@/components/ProductCard';
-import ProductFilters from '@/components/filters/ProductFilters';
-import AIChat from '@/components/chat/AIChat';
+import { useEffect, useState } from "react";
+import { useProductStore } from "@/store/productStore";
+import ProductCard from "@/components/ProductCard";
+import ProductFilters from "@/components/filters/ProductFilters";
+import AIChat from "@/components/chat/AIChat";
 
 const Men = () => {
   const { products, isLoading, fetchProducts } = useProductStore();
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  console.log("men products", products);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
   useEffect(() => {
-    const menProducts = products.filter(product => 
-      product.category === 'Men' || product.category === 'Basketball'
+    const menProducts = products.filter(
+      (product) => product.category?.toUpperCase() === "MEN"
     );
     setFilteredProducts(menProducts);
   }, [products]);
 
   const handleFiltersChange = (filters: any) => {
-    let filtered = products.filter(product => 
-      product.category === 'Men' || product.category === 'Basketball'
+    let filtered = products.filter(
+      (product) => product.category?.toUpperCase() === "MEN"
     );
 
     // Apply category filter
     if (filters.categories.length > 0) {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter((product) =>
         filters.categories.includes(product.category)
       );
     }
 
     // Apply price filter
-    filtered = filtered.filter(product => 
-      product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1]
+    filtered = filtered.filter(
+      (product) =>
+        product.price >= filters.priceRange[0] &&
+        product.price <= filters.priceRange[1]
     );
 
     // Apply sorting
     switch (filters.sortBy) {
-      case 'price-low':
+      case "price-low":
         filtered.sort((a, b) => a.price - b.price);
         break;
-      case 'price-high':
+      case "price-high":
         filtered.sort((a, b) => b.price - a.price);
         break;
-      case 'newest':
+      case "newest":
       default:
         // Keep original order
         break;
@@ -58,16 +61,22 @@ const Men = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-nike-dark mb-4">Men's Collection</h1>
+          <h1 className="text-5xl font-bold text-nike-dark mb-4">
+            Men's Collection
+          </h1>
           <p className="text-xl text-nike-gray max-w-2xl mx-auto">
-            Discover our latest men's footwear designed for performance and style
+            Discover our latest men's footwear designed for performance and
+            style
           </p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
           <div className="lg:w-64 flex-shrink-0">
-            <ProductFilters onFiltersChange={handleFiltersChange} currentCategory="Men" />
+            <ProductFilters
+              onFiltersChange={handleFiltersChange}
+              currentCategory="Men"
+            />
           </div>
 
           {/* Products Grid */}
@@ -85,7 +94,11 @@ const Men = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredProducts.map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    index={index}
+                  />
                 ))}
               </div>
             )}

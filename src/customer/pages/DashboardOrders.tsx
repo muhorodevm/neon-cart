@@ -20,6 +20,7 @@ import {
 import Receipt from "@/components/dashboard/Receipt";
 import { useQuery } from "@tanstack/react-query";
 import { orderApi } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type OrderItem = {
   name: string;
@@ -37,6 +38,7 @@ type Order = {
   tax: number;
   status: string;
   items: OrderItem[];
+  receiptUrl?: string;
   customer: {
     name: string;
     email: string;
@@ -49,16 +51,10 @@ type Order = {
 const DashboardOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // Fetch orders using React Query
-  const {
-    data: orders = [],
-    isLoading,
-    isError,
-  } = useQuery<Order[]>({
+  const { data: orders = [], isLoading, isError } = useQuery<Order[]>({
     queryKey: ["userOrders"],
     queryFn: async () => {
       const response = await orderApi.getMyOrders();
-      // return only the orders array (assert response shape)
       return (response as { data: { orders: Order[] } }).data.orders;
     },
   });
@@ -74,7 +70,26 @@ const DashboardOrders = () => {
     return colors[status] || "bg-gray-500";
   };
 
-  if (isLoading) return <p>Loading orders...</p>;
+  if (isLoading)
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>My Orders</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="grid grid-cols-4 gap-4 items-center">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-8 w-24 justify-self-end" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
   if (isError) return <p>Failed to load orders.</p>;
 
   return (
@@ -97,25 +112,15 @@ const DashboardOrders = () => {
             <TableBody>
               {orders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">
-                    {order.orderNumber}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </TableCell>
+                  <TableCell className="font-medium">{order.orderNumber}</TableCell>
+                  <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>KSh {order.total.toLocaleString()}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status}
-                    </Badge>
+                    <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedOrder(order)}
-                      >
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(order)}>
                         <Eye className="h-4 w-4 mr-2" />
                         View
                       </Button>
@@ -128,28 +133,43 @@ const DashboardOrders = () => {
         </CardContent>
       </Card>
 
-      {/* Order Receipt Dialog */}
-      <Dialog
-        open={!!selectedOrder}
-        onOpenChange={() => setSelectedOrder(null)}
-      >
+      <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Order Receipt</DialogTitle>
           </DialogHeader>
-
-          {selectedOrder && (
-            <Receipt
-              orderNumber={selectedOrder.orderNumber}
-              date={new Date(selectedOrder.createdAt).toLocaleDateString()}
-              items={selectedOrder.items}
-              subtotal={selectedOrder.subtotal}
-              tax={selectedOrder.tax}
-              total={selectedOrder.total}
-              customerInfo={selectedOrder.customer}
-              paymentMethod={selectedOrder.paymentMethod}
-            />
-          )}
+          {selectedOrder && selectedOrder.receiptUrl ? (
+            <div className="h-[70vh]">
+              <iframe src={selectedOrder.receiptUrl} title="Receipt" className="w-full h-full border-none" />
+            </div>
+          ) : selectedOrder && (() => {
+            const items = (selectedOrder.items || []).map((it: any) => ({
+              name: it.name || it.product?.name || "Item",
+              quantity: it.quantity,
+              price: Number(it.price) * Number(it.quantity || 1),
+            }));
+            const addr = (selectedOrder as any).address;
+            const customerInfo = selectedOrder.customer || {
+              name: "Customer",
+              email: "N/A",
+              phone: "N/A",
+              address: addr
+                ? `${addr.street}, ${addr.city}${addr.state ? ", " + addr.state : ""}, ${addr.country}`
+                : "N/A",
+            };
+            return (
+              <Receipt
+                orderNumber={selectedOrder.orderNumber}
+                date={new Date(selectedOrder.createdAt).toLocaleDateString()}
+                items={items}
+                subtotal={selectedOrder.subtotal}
+                tax={selectedOrder.tax}
+                total={selectedOrder.total}
+                customerInfo={customerInfo}
+                paymentMethod={selectedOrder.paymentMethod}
+              />
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </>
@@ -157,3 +177,5 @@ const DashboardOrders = () => {
 };
 
 export default DashboardOrders;
+
+

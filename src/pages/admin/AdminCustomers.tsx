@@ -1,32 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import AdminLayout from "@/components/layout/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
+import { adminApi } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AdminCustomers = () => {
-  // Placeholder data - replace with actual API call
-  const { data: customers } = useQuery({
+  const { data: customers, isLoading } = useQuery({
     queryKey: ["admin-customers"],
     queryFn: async () => {
-      // Replace with actual API call
-      return [
-        {
-          id: "1",
-          email: "customer1@example.com",
-          profile: {
-            firstName: "John",
-            lastName: "Doe",
-            avatarUrl: null,
-          },
-          totalOrders: 5,
-          totalSpent: 15000,
-          createdAt: new Date(),
-        },
-      ];
+      const res = await adminApi.getCustomers();
+      return (res as { data: { customers: any[] } }).data.customers;
     },
+    refetchInterval: 30000,
   });
 
   return (
@@ -55,7 +43,17 @@ const AdminCustomers = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customers?.map((customer) => (
+              {isLoading ? (
+                [...Array(6)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-8 w-64" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-64" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                  </TableRow>
+                ))
+              ) : customers?.map((customer) => (
                 <TableRow key={customer.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">

@@ -6,13 +6,14 @@ import {
   sendOrderDeliveredEmail,
 } from "../services/email.service";
 import { generateReceipt } from "../services/receipt.service";
+import path from "path";
 
 const prisma = new PrismaClient();
 
 export async function createOrder(req: AuthRequest, res: Response) {
   try {
-    const { addressId, paymentMethod, items, mpesaPhoneNumber, notes } =
-      req.body;
+    const { addressId, address, paymentMethod, items, mpesaPhoneNumber, notes } =
+      req.body as any;
 
     // Calculate totals
     const subtotal = items.reduce(
@@ -29,12 +30,33 @@ export async function createOrder(req: AuthRequest, res: Response) {
       .substring(2, 7)
       .toUpperCase()}`;
 
+    // Determine address: use provided addressId or create from address payload
+    let resolvedAddressId = addressId as string | undefined;
+    if (!resolvedAddressId && address && address.street && address.city && address.postalCode && address.country) {
+      const createdAddr = await prisma.address.create({
+        data: {
+          userId: req.user!.id,
+          street: address.street,
+          city: address.city,
+          state: address.state || '',
+          postalCode: address.postalCode,
+          country: address.country,
+          isDefault: !!address.isDefault,
+        },
+      });
+      resolvedAddressId = createdAddr.id;
+    }
+
+    if (!resolvedAddressId) {
+      return res.status(400).json({ error: "Address is required" });
+    }
+
     // Create order
     const order = await prisma.order.create({
       data: {
         orderNumber,
         userId: req.user!.id,
-        addressId,
+        addressId: resolvedAddressId,
         paymentMethod,
         mpesaPhoneNumber,
         subtotal,
@@ -164,11 +186,11 @@ export async function updateOrderStatus(req: AuthRequest, res: Response) {
       );
 
       // Generate and attach receipt
-      const receiptUrl = await generateReceipt(order.id);
-      await prisma.order.update({
-        where: { id },
-        data: { receiptUrl },
-      });
+      const receiptFilePath = await generateReceipt(order.id);
+      const receiptFilename = path.basename(receiptFilePath);
+      const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
+      const receiptUrl = `${baseUrl}/receipts/${receiptFilename}`;
+      await prisma.order.update({ where: { id }, data: { receiptUrl } });
     }
 
     res.json({

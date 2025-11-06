@@ -15,14 +15,14 @@ const Women = () => {
 
   useEffect(() => {
     const womenProducts = products.filter(product => 
-      product.category === 'Women'
+      product.category?.toUpperCase() === 'WOMEN'
     );
     setFilteredProducts(womenProducts);
   }, [products]);
 
   const handleFiltersChange = (filters: any) => {
     let filtered = products.filter(product => 
-      product.category === 'Women'
+      product.category?.toUpperCase() === 'WOMEN'
     );
 
     // Apply category filter

@@ -291,15 +291,13 @@ async function main() {
     },
   ];
 
-  for (const product of products) {
-    await prisma.product.upsert({
-      where: { name: product.name },
-      update: {},
-      create: product,
-    });
-  }
+  // Insert products; avoid FK issues by not deleting existing ones
+  await prisma.product.createMany({
+    data: products as any[],
+    skipDuplicates: true, // if a unique constraint exists in future, this will skip
+  });
 
-  console.log('✅ Products created:', products.length);
+  console.log('✅ Products inserted (skipping duplicates if any):', products.length);
 
   console.log('🌱 Database seeding completed!');
   console.log('\n📝 Login credentials:');

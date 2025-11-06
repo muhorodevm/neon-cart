@@ -1,35 +1,76 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Edit, X, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuthStore } from "@/store/authStore";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { userApi } from "@/lib/api";
+
+type Profile = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+};
 
 const DashboardProfile = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const { user } = useAuthStore();
-  console.log("User from store:", user);
-  const [profile, setProfile] = useState({
-    firstName: user?.profile.firstName,
-    lastName: user?.profile.lastName,
-    email: user?.email,
-    phone: user?.profile.phone,
+  const [profile, setProfile] = useState<Profile>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+  });
+
+  const { data, isLoading } = useQuery<{ user: { email: string; profile: Profile } }>({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
+      const response = await userApi.getProfile();
+      return (response as { data: { user: { email: string; profile: Profile } } }).data;
+    },
+  });
+
+  useEffect(() => {
+    if (data?.user?.profile) {
+      setProfile({
+        firstName: data.user.profile.firstName,
+        lastName: data.user.profile.lastName,
+        email: data.user.email,
+        phone: data.user.profile.phone,
+      });
+    }
+  }, [data]);
+
+  const updateMutation = useMutation({
+    mutationFn: async (payload: Omit<Profile, "email">) => {
+      const response = await userApi.updateProfile(payload);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast({ title: "Profile Updated", description: "Your profile was saved." });
+      setIsEditing(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error?.response?.data?.error || "Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleSave = () => {
-    setIsEditing(false);
-    toast({
-      title: "Profile Updated",
-      description: "Your profile information has been updated successfully",
+    updateMutation.mutate({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      phone: profile.phone,
     });
   };
 
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
+  const handleCancel = () => setIsEditing(false);
 
   return (
     <div className="container mx-auto p-6">
@@ -41,11 +82,7 @@ const DashboardProfile = () => {
               Profile Information
             </CardTitle>
             {!isEditing ? (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(true)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} disabled={isLoading}>
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
@@ -55,7 +92,7 @@ const DashboardProfile = () => {
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
-                <Button size="sm" onClick={handleSave}>
+                <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
                   <Save className="h-4 w-4 mr-2" />
                   Save
                 </Button>
@@ -71,50 +108,32 @@ const DashboardProfile = () => {
                 <Input
                   id="firstName"
                   value={profile.firstName}
-                  onChange={(e) =>
-                    setProfile({ ...profile, firstName: e.target.value })
-                  }
+                  onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
                   disabled={!isEditing}
                   className={!isEditing ? "cursor-not-allowed opacity-60" : ""}
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
                   value={profile.lastName}
-                  onChange={(e) =>
-                    setProfile({ ...profile, lastName: e.target.value })
-                  }
+                  onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
                   disabled={!isEditing}
                   className={!isEditing ? "cursor-not-allowed opacity-60" : ""}
                 />
               </div>
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={profile.email}
-                onChange={(e) =>
-                  setProfile({ ...profile, email: e.target.value })
-                }
-                disabled={!isEditing}
-                className={!isEditing ? "cursor-not-allowed opacity-60" : ""}
-              />
+              <Input id="email" type="email" value={profile.email} disabled className="cursor-not-allowed opacity-60" />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <Input
                 id="phone"
                 value={profile.phone}
-                onChange={(e) =>
-                  setProfile({ ...profile, phone: e.target.value })
-                }
+                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                 disabled={!isEditing}
                 className={!isEditing ? "cursor-not-allowed opacity-60" : ""}
               />
@@ -127,3 +146,5 @@ const DashboardProfile = () => {
 };
 
 export default DashboardProfile;
+
+

@@ -4,6 +4,7 @@ import { AuthRequest } from '../middlewares/auth.middleware';
 import { generatePaymentCode } from '../utils/otp.util';
 import { generateReceipt } from '../services/receipt.service';
 import { sendOrderConfirmationEmail } from '../services/email.service';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -58,19 +59,20 @@ export async function initiateMpesaPayment(req: AuthRequest, res: Response) {
       },
     });
 
-    // Generate receipt
-    const receiptUrl = await generateReceipt(orderId);
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { receiptUrl },
-    });
+    // Generate receipt PDF on disk and store URL on order
+    const receiptFilePath = await generateReceipt(orderId);
+    const receiptFilename = path.basename(receiptFilePath);
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
+    const receiptUrl = `${baseUrl}/receipts/${receiptFilename}`;
+    await prisma.order.update({ where: { id: orderId }, data: { receiptUrl } });
 
     // Send confirmation email with receipt
     await sendOrderConfirmationEmail(
       payment.order.user.email,
       payment.order.user.profile?.firstName || 'Customer',
       payment.order.orderNumber,
-      amount
+      amount,
+      receiptFilePath
     );
 
     res.json({

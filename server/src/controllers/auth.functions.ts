@@ -162,6 +162,56 @@ export async function login(req: Request, res: Response) {
   }
 }
 
+export async function adminLogin(req: Request, res: Response) {
+  try {
+    const { email, password } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { userRoles: true, profile: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const roles = user.userRoles.map((r) => r.role);
+    const isAdmin = roles.includes('ADMIN') || roles.includes('SUPER_ADMIN');
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    if (!user.passwordHash) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    if (!user.isActive) {
+      return res.status(401).json({ error: 'Account is inactive' });
+    }
+
+    const token = generateToken(user.id, user.email);
+
+    res.json({
+      message: 'Admin login successful',
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        roles,
+        profile: user.profile,
+      },
+    });
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+}
+
 export async function requestPasswordReset(req: Request, res: Response) {
   try {
     const { email } = req.body;
