@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 export const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -12,7 +12,7 @@ export const transporter = nodemailer.createTransport({
 
 export const emailTemplates = {
   signup: (name: string, otp: string) => ({
-    subject: 'Welcome to Ndula - Verify Your Email',
+    subject: "Welcome to Ndula - Verify Your Email",
     html: `
       <!DOCTYPE html>
       <html>
@@ -61,7 +61,7 @@ export const emailTemplates = {
                   <tr>
                     <td style="background-color: #f9fafb; padding: 30px 40px; border-top: 1px solid #e5e7eb;">
                       <p style="margin: 0; color: #9ca3af; font-size: 13px; text-align: center; line-height: 1.6;">
-                        © 2024 Ndula. All rights reserved.<br>
+                        © ${new Date().getFullYear()} Ndula. All rights reserved.<br>
                         Premium footwear and fashion for everyone.
                       </p>
                     </td>
@@ -74,7 +74,7 @@ export const emailTemplates = {
       </html>
     `,
   }),
-  
+
   orderPlaced: (name: string, orderNumber: string, total: string) => ({
     subject: `Order Confirmation - ${orderNumber}`,
     html: `
@@ -135,7 +135,7 @@ export const emailTemplates = {
                   <tr>
                     <td style="background-color: #f9fafb; padding: 30px 40px; border-top: 1px solid #e5e7eb;">
                       <p style="margin: 0; color: #9ca3af; font-size: 13px; text-align: center; line-height: 1.6;">
-                        © 2024 Ndula. All rights reserved.<br>
+                        © ${new Date().getFullYear()} Ndula. All rights reserved.<br>
                         Premium footwear and fashion for everyone.
                       </p>
                     </td>
@@ -148,7 +148,7 @@ export const emailTemplates = {
       </html>
     `,
   }),
-  
+
   orderDelivered: (name: string, orderNumber: string) => ({
     subject: `Your Order Has Been Delivered - ${orderNumber}`,
     html: `
@@ -203,7 +203,7 @@ export const emailTemplates = {
                   <tr>
                     <td style="background-color: #f9fafb; padding: 30px 40px; border-top: 1px solid #e5e7eb;">
                       <p style="margin: 0; color: #9ca3af; font-size: 13px; text-align: center; line-height: 1.6;">
-                        © 2024 Ndula. All rights reserved.<br>
+                        © ${new Date().getFullYear()} Ndula. All rights reserved.<br>
                         Premium footwear and fashion for everyone.
                       </p>
                     </td>
@@ -216,9 +216,9 @@ export const emailTemplates = {
       </html>
     `,
   }),
-  
+
   passwordReset: (name: string, otp: string) => ({
-    subject: 'Password Reset Request - Ndula',
+    subject: "Password Reset Request - Ndula",
     html: `
       <!DOCTYPE html>
       <html>
