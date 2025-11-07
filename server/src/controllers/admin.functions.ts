@@ -1,14 +1,14 @@
-import { Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import { AuthRequest } from '../middlewares/auth.middleware';
+import { Response } from "express";
+import { PrismaClient } from "@prisma/client";
+import { AuthRequest } from "../middlewares/auth.middleware";
 
 const prisma = new PrismaClient();
 
-export async function getDashboardStats(req: AuthRequest, res: Response) {
+export async function getDashboardStats(_req: AuthRequest, res: Response) {
   try {
     // Total revenue
     const totalRevenue = await prisma.order.aggregate({
-      where: { paymentStatus: 'COMPLETED' },
+      where: { paymentStatus: "COMPLETED" },
       _sum: { total: true },
     });
 
@@ -19,7 +19,7 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
     const totalCustomers = await prisma.user.count({
       where: {
         userRoles: {
-          some: { role: 'CUSTOMER' },
+          some: { role: "CUSTOMER" },
         },
       },
     });
@@ -30,7 +30,7 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
     // Recent orders
     const recentOrders = await prisma.order.findMany({
       take: 10,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         user: {
           include: {
@@ -47,11 +47,11 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
 
     // Top products
     const topProducts = await prisma.orderItem.groupBy({
-      by: ['productId'],
+      by: ["productId"],
       _sum: { quantity: true },
       orderBy: {
         _sum: {
-          quantity: 'desc',
+          quantity: "desc",
         },
       },
       take: 5,
@@ -73,7 +73,7 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
     const ordersByCategory = await prisma.orderItem.findMany({
       where: {
         order: {
-          paymentStatus: 'COMPLETED',
+          paymentStatus: "COMPLETED",
         },
       },
       include: {
@@ -92,7 +92,7 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
 
     // Orders by status
     const ordersByStatus = await prisma.order.groupBy({
-      by: ['status'],
+      by: ["status"],
       _count: true,
     });
 
@@ -109,17 +109,17 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
       },
     });
   } catch (error) {
-    console.error('Get dashboard stats error:', error);
-    res.status(500).json({ error: 'Failed to get dashboard stats' });
+    console.error("Get dashboard stats error:", error);
+    res.status(500).json({ error: "Failed to get dashboard stats" });
   }
 }
 
-export async function getAllCustomers(req: AuthRequest, res: Response) {
+export async function getAllCustomers(_req: AuthRequest, res: Response) {
   try {
     const customers = await prisma.user.findMany({
       where: {
         userRoles: {
-          some: { role: 'CUSTOMER' },
+          some: { role: "CUSTOMER" },
         },
       },
       include: {
@@ -131,7 +131,7 @@ export async function getAllCustomers(req: AuthRequest, res: Response) {
         },
         orders: {
           where: {
-            paymentStatus: 'COMPLETED',
+            paymentStatus: "COMPLETED",
           },
           select: {
             total: true,
@@ -151,7 +151,7 @@ export async function getAllCustomers(req: AuthRequest, res: Response) {
 
     res.json({ customers: customersWithStats });
   } catch (error) {
-    console.error('Get customers error:', error);
-    res.status(500).json({ error: 'Failed to get customers' });
+    console.error("Get customers error:", error);
+    res.status(500).json({ error: "Failed to get customers" });
   }
 }
