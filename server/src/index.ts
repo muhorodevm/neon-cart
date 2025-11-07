@@ -44,7 +44,6 @@ app.use("/api/admin", adminRoutes);
 app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "Server is running" });
 });
-
 // Error handling
 app.use(errorHandler);
 

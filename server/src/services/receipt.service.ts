@@ -76,13 +76,21 @@ export async function generateReceipt(orderId: string): Promise<string> {
     doc.pipe(stream);
 
     // LOGO
-    const logoPath = path.join(__dirname, "..", "..", "public", "favicon.ico");
+    const logoPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "..",
+      "public",
+      "ndula.png"
+    );
+    console.log("logoPath", logoPath);
     if (fs.existsSync(logoPath)) {
       doc.image(logoPath, 50, 40, { width: 80 });
     }
 
     // HEADER TEXT
-    doc.fontSize(20).text("NDULA SUPERMARKET", 0, 50, { align: "center" });
+    doc.fontSize(20).text("NDULA MOTO", 0, 50, { align: "center" });
     doc.fontSize(12).text("Order Receipt", { align: "center" });
     doc.moveDown(2);
 
@@ -155,11 +163,9 @@ export async function generateReceipt(orderId: string): Promise<string> {
       align: "right",
     });
     doc.moveDown(0.5);
-    doc
-      .fontSize(14)
-      .text(`TOTAL: KSh ${receiptData.total.toLocaleString()}`, {
-        align: "right",
-      });
+    doc.fontSize(14).text(`TOTAL: KSh ${receiptData.total.toLocaleString()}`, {
+      align: "right",
+    });
 
     doc.moveDown(1.5);
     doc.moveTo(50, doc.y).lineTo(550, doc.y).dash(3, { space: 3 }).stroke();
