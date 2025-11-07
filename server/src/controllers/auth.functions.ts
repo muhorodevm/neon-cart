@@ -1,9 +1,12 @@
-import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
-import { generateToken } from '../utils/jwt.util';
-import { generateOTP } from '../utils/otp.util';
-import { sendSignupEmail, sendPasswordResetEmail } from '../services/email.service';
+import { Request, Response } from "express";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import { generateToken } from "../utils/jwt.util";
+import { generateOTP } from "../utils/otp.util";
+import {
+  sendSignupEmail,
+  sendPasswordResetEmail,
+} from "../services/email.service";
 
 const prisma = new PrismaClient();
 
@@ -16,7 +19,7 @@ export async function signup(req: Request, res: Response) {
 
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ error: 'Email already registered' });
+      return res.status(400).json({ error: "Email already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -29,12 +32,12 @@ export async function signup(req: Request, res: Response) {
     await sendSignupEmail(email, firstName, otp);
 
     return res.json({
-      message: 'OTP sent to your email',
+      message: "OTP sent to your email",
       tempData: { email, hashedPassword, firstName, lastName },
     });
   } catch (error) {
-    console.error('Signup error:', error);
-    return res.status(500).json({ error: 'Signup failed' });
+    console.error("Signup error:", error);
+    return res.status(500).json({ error: "Signup failed" });
   }
 }
 
@@ -44,16 +47,16 @@ export async function verifySignupOTP(req: Request, res: Response) {
 
     const storedOTP = otpStore.get(email);
     if (!storedOTP) {
-      return res.status(400).json({ error: 'OTP expired or not found' });
+      return res.status(400).json({ error: "OTP expired or not found" });
     }
 
     if (storedOTP.otp !== otp) {
-      return res.status(400).json({ error: 'Invalid OTP' });
+      return res.status(400).json({ error: "Invalid OTP" });
     }
 
     if (new Date() > storedOTP.expiresAt) {
       otpStore.delete(email);
-      return res.status(400).json({ error: 'OTP expired' });
+      return res.status(400).json({ error: "OTP expired" });
     }
 
     // Create user
@@ -70,7 +73,7 @@ export async function verifySignupOTP(req: Request, res: Response) {
         },
         userRoles: {
           create: {
-            role: 'CUSTOMER',
+            role: "CUSTOMER",
           },
         },
       },
@@ -81,7 +84,7 @@ export async function verifySignupOTP(req: Request, res: Response) {
     const token = generateToken(user.id, user.email);
 
     return res.json({
-      message: 'Account created successfully',
+      message: "Account created successfully",
       token,
       user: {
         id: user.id,
@@ -89,8 +92,8 @@ export async function verifySignupOTP(req: Request, res: Response) {
       },
     });
   } catch (error) {
-    console.error('OTP verification error:', error);
-    return res.status(500).json({ error: 'Verification failed' });
+    console.error("OTP verification error:", error);
+    return res.status(500).json({ error: "Verification failed" });
   }
 }
 
@@ -100,7 +103,7 @@ export async function resendOTP(req: Request, res: Response) {
 
     const existingOTP = otpStore.get(email);
     if (!existingOTP) {
-      return res.status(400).json({ error: 'No pending OTP request found' });
+      return res.status(400).json({ error: "No pending OTP request found" });
     }
 
     const otp = generateOTP();
@@ -109,12 +112,12 @@ export async function resendOTP(req: Request, res: Response) {
     otpStore.set(email, { otp, expiresAt });
 
     // Resend OTP email
-    await sendSignupEmail(email, 'User', otp);
+    await sendSignupEmail(email, "User", otp);
 
-    return res.json({ message: 'OTP resent successfully' });
+    return res.json({ message: "OTP resent successfully" });
   } catch (error) {
-    console.error('Resend OTP error:', error);
-    return res.status(500).json({ error: 'Failed to resend OTP' });
+    console.error("Resend OTP error:", error);
+    return res.status(500).json({ error: "Failed to resend OTP" });
   }
 }
 
@@ -128,26 +131,26 @@ export async function login(req: Request, res: Response) {
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     if (!user.passwordHash) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
     if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     if (!user.isActive) {
-      return res.status(401).json({ error: 'Account is inactive' });
+      return res.status(401).json({ error: "Account is inactive" });
     }
 
     const token = generateToken(user.id, user.email);
 
     return res.json({
-      message: 'Login successful',
+      message: "Login successful",
       token,
       user: {
         id: user.id,
@@ -157,8 +160,8 @@ export async function login(req: Request, res: Response) {
       },
     });
   } catch (error) {
-    console.error('Login error:', error);
-    return res.status(500).json({ error: 'Login failed' });
+    console.error("Login error:", error);
+    return res.status(500).json({ error: "Login failed" });
   }
 }
 
@@ -172,32 +175,32 @@ export async function adminLogin(req: Request, res: Response) {
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const roles = user.userRoles.map((r) => r.role);
-    const isAdmin = roles.includes('ADMIN') || roles.includes('SUPER_ADMIN');
+    const isAdmin = roles.includes("ADMIN") || roles.includes("SUPER_ADMIN");
     if (!isAdmin) {
-      return res.status(403).json({ error: 'Admin access required' });
+      return res.status(403).json({ error: "Admin access required" });
     }
 
     if (!user.passwordHash) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
     if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     if (!user.isActive) {
-      return res.status(401).json({ error: 'Account is inactive' });
+      return res.status(401).json({ error: "Account is inactive" });
     }
 
     const token = generateToken(user.id, user.email);
 
     return res.json({
-      message: 'Admin login successful',
+      message: "Admin login successful",
       token,
       user: {
         id: user.id,
@@ -207,8 +210,8 @@ export async function adminLogin(req: Request, res: Response) {
       },
     });
   } catch (error) {
-    console.error('Admin login error:', error);
-    return res.status(500).json({ error: 'Login failed' });
+    console.error("Admin login error:", error);
+    return res.status(500).json({ error: "Login failed" });
   }
 }
 
@@ -222,7 +225,7 @@ export async function requestPasswordReset(req: Request, res: Response) {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const otp = generateOTP();
@@ -230,16 +233,12 @@ export async function requestPasswordReset(req: Request, res: Response) {
 
     otpStore.set(email, { otp, expiresAt });
 
-    await sendPasswordResetEmail(
-      email,
-      user.profile?.firstName || 'User',
-      otp
-    );
+    await sendPasswordResetEmail(email, user.profile?.firstName || "User", otp);
 
-    return res.json({ message: 'Password reset OTP sent to your email' });
+    return res.json({ message: "Password reset OTP sent to your email" });
   } catch (error) {
-    console.error('Password reset request error:', error);
-    return res.status(500).json({ error: 'Request failed' });
+    console.error("Password reset request error:", error);
+    return res.status(500).json({ error: "Request failed" });
   }
 }
 
@@ -249,12 +248,12 @@ export async function resetPassword(req: Request, res: Response) {
 
     const storedOTP = otpStore.get(email);
     if (!storedOTP || storedOTP.otp !== otp) {
-      return res.status(400).json({ error: 'Invalid or expired OTP' });
+      return res.status(400).json({ error: "Invalid or expired OTP" });
     }
 
     if (new Date() > storedOTP.expiresAt) {
       otpStore.delete(email);
-      return res.status(400).json({ error: 'OTP expired' });
+      return res.status(400).json({ error: "OTP expired" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -266,9 +265,9 @@ export async function resetPassword(req: Request, res: Response) {
 
     otpStore.delete(email);
 
-    return res.json({ message: 'Password reset successful' });
+    return res.json({ message: "Password reset successful" });
   } catch (error) {
-    console.error('Password reset error:', error);
-    return res.status(500).json({ error: 'Reset failed' });
+    console.error("Password reset error:", error);
+    return res.status(500).json({ error: "Reset failed" });
   }
 }
