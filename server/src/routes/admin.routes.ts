@@ -3,6 +3,7 @@ import { authenticate, authorize } from '../middlewares/auth.middleware';
 import { getDashboardStats, getAllCustomers } from '../controllers/admin.functions';
 import { adminLogin } from '../controllers/auth.functions';
 
+// hello
 const router = Router();
 
 // Public admin auth
