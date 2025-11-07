@@ -36,13 +36,13 @@ export async function createProduct(req: AuthRequest, res: Response) {
       },
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Product created successfully',
       product,
     });
   } catch (error) {
     console.error('Create product error:', error);
-    res.status(500).json({ error: 'Failed to create product' });
+    return res.status(500).json({ error: 'Failed to create product' });
   }
 }
 
@@ -59,13 +59,13 @@ export async function updateProduct(req: AuthRequest, res: Response) {
       },
     });
 
-    res.json({
+    return res.json({
       message: 'Product updated successfully',
       product,
     });
   } catch (error) {
     console.error('Update product error:', error);
-    res.status(500).json({ error: 'Failed to update product' });
+    return res.status(500).json({ error: 'Failed to update product' });
   }
 }
 
@@ -77,10 +77,10 @@ export async function deleteProduct(req: AuthRequest, res: Response) {
       where: { id },
     });
 
-    res.json({ message: 'Product deleted successfully' });
+    return res.json({ message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Delete product error:', error);
-    res.status(500).json({ error: 'Failed to delete product' });
+    return res.status(500).json({ error: 'Failed to delete product' });
   }
 }
 
@@ -113,10 +113,10 @@ export async function getProduct(req: Request, res: Response) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    res.json({ product });
+    return res.json({ product });
   } catch (error) {
     console.error('Get product error:', error);
-    res.status(500).json({ error: 'Failed to get product' });
+    return res.status(500).json({ error: 'Failed to get product' });
   }
 }
 
@@ -152,9 +152,9 @@ export async function getAllProducts(req: Request, res: Response) {
       orderBy: { createdAt: 'desc' },
     });
 
-    res.json({ products });
+    return res.json({ products });
   } catch (error) {
     console.error('Get products error:', error);
-    res.status(500).json({ error: 'Failed to get products' });
+    return res.status(500).json({ error: 'Failed to get products' });
   }
 }

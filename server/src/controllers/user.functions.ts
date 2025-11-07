@@ -23,10 +23,10 @@ export async function getProfile(req: AuthRequest, res: Response) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json({ user });
+    return res.json({ user });
   } catch (error) {
     console.error('Get profile error:', error);
-    res.status(500).json({ error: 'Failed to get profile' });
+    return res.status(500).json({ error: 'Failed to get profile' });
   }
 }
 
@@ -49,7 +49,7 @@ export async function updateProfile(req: AuthRequest, res: Response) {
       },
     });
 
-    res.json({
+    return res.json({
       message: 'Profile updated successfully',
       user: {
         id: user.id,
@@ -59,7 +59,7 @@ export async function updateProfile(req: AuthRequest, res: Response) {
     });
   } catch (error) {
     console.error('Update profile error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
+    return res.status(500).json({ error: 'Failed to update profile' });
   }
 }
 
@@ -87,13 +87,13 @@ export async function addAddress(req: AuthRequest, res: Response) {
       },
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: 'Address added successfully',
       address,
     });
   } catch (error) {
     console.error('Add address error:', error);
-    res.status(500).json({ error: 'Failed to add address' });
+    return res.status(500).json({ error: 'Failed to add address' });
   }
 }
 
@@ -130,13 +130,13 @@ export async function updateAddress(req: AuthRequest, res: Response) {
       data: { street, city, state, postalCode, country, isDefault },
     });
 
-    res.json({
+    return res.json({
       message: 'Address updated successfully',
       address,
     });
   } catch (error) {
     console.error('Update address error:', error);
-    res.status(500).json({ error: 'Failed to update address' });
+    return res.status(500).json({ error: 'Failed to update address' });
   }
 }
 
@@ -160,10 +160,10 @@ export async function deleteAddress(req: AuthRequest, res: Response) {
       where: { id },
     });
 
-    res.json({ message: 'Address deleted successfully' });
+    return res.json({ message: 'Address deleted successfully' });
   } catch (error) {
     console.error('Delete address error:', error);
-    res.status(500).json({ error: 'Failed to delete address' });
+    return res.status(500).json({ error: 'Failed to delete address' });
   }
 }
 
@@ -174,9 +174,9 @@ export async function getAddresses(req: AuthRequest, res: Response) {
       orderBy: { isDefault: 'desc' },
     });
 
-    res.json({ addresses });
+    return res.json({ addresses });
   } catch (error) {
     console.error('Get addresses error:', error);
-    res.status(500).json({ error: 'Failed to get addresses' });
+    return res.status(500).json({ error: 'Failed to get addresses' });
   }
 }

@@ -51,7 +51,7 @@ export async function initiateMpesaPayment(req: AuthRequest, res: Response) {
     });
 
     // Update order payment status
-    const updatedOrder = await prisma.order.update({
+    await prisma.order.update({
       where: { id: orderId },
       data: {
         paymentStatus: 'COMPLETED',
@@ -75,7 +75,7 @@ export async function initiateMpesaPayment(req: AuthRequest, res: Response) {
       receiptFilePath
     );
 
-    res.json({
+    return res.json({
       message: 'Payment successful (simulated)',
       payment: {
         transactionId,
@@ -87,7 +87,7 @@ export async function initiateMpesaPayment(req: AuthRequest, res: Response) {
     });
   } catch (error) {
     console.error('Payment error:', error);
-    res.status(500).json({ error: 'Payment failed' });
+    return res.status(500).json({ error: 'Payment failed' });
   }
 }
 
@@ -104,9 +104,9 @@ export async function getPaymentStatus(req: AuthRequest, res: Response) {
       return res.status(404).json({ error: 'Payment not found' });
     }
 
-    res.json({ payment });
+    return res.json({ payment });
   } catch (error) {
     console.error('Get payment error:', error);
-    res.status(500).json({ error: 'Failed to fetch payment' });
+    return res.status(500).json({ error: 'Failed to fetch payment' });
   }
 }

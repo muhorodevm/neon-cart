@@ -26,9 +26,9 @@ router.post('/upload-avatar', upload.single('avatar'), async (req, res) => {
     }
 
     const result = await uploadImage(req.file, 'avatars');
-    res.json({ message: 'Avatar uploaded successfully', ...result });
+    return res.json({ message: 'Avatar uploaded successfully', ...result });
   } catch (error) {
-    res.status(500).json({ error: 'Upload failed' });
+    return res.status(500).json({ error: 'Upload failed' });
   }
 });
 

@@ -28,13 +28,13 @@ export async function signup(req: Request, res: Response) {
     // Send OTP email
     await sendSignupEmail(email, firstName, otp);
 
-    res.json({
+    return res.json({
       message: 'OTP sent to your email',
       tempData: { email, hashedPassword, firstName, lastName },
     });
   } catch (error) {
     console.error('Signup error:', error);
-    res.status(500).json({ error: 'Signup failed' });
+    return res.status(500).json({ error: 'Signup failed' });
   }
 }
 
@@ -80,7 +80,7 @@ export async function verifySignupOTP(req: Request, res: Response) {
 
     const token = generateToken(user.id, user.email);
 
-    res.json({
+    return res.json({
       message: 'Account created successfully',
       token,
       user: {
@@ -90,7 +90,7 @@ export async function verifySignupOTP(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('OTP verification error:', error);
-    res.status(500).json({ error: 'Verification failed' });
+    return res.status(500).json({ error: 'Verification failed' });
   }
 }
 
@@ -111,10 +111,10 @@ export async function resendOTP(req: Request, res: Response) {
     // Resend OTP email
     await sendSignupEmail(email, 'User', otp);
 
-    res.json({ message: 'OTP resent successfully' });
+    return res.json({ message: 'OTP resent successfully' });
   } catch (error) {
     console.error('Resend OTP error:', error);
-    res.status(500).json({ error: 'Failed to resend OTP' });
+    return res.status(500).json({ error: 'Failed to resend OTP' });
   }
 }
 
@@ -146,7 +146,7 @@ export async function login(req: Request, res: Response) {
 
     const token = generateToken(user.id, user.email);
 
-    res.json({
+    return res.json({
       message: 'Login successful',
       token,
       user: {
@@ -158,7 +158,7 @@ export async function login(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    return res.status(500).json({ error: 'Login failed' });
   }
 }
 
@@ -196,7 +196,7 @@ export async function adminLogin(req: Request, res: Response) {
 
     const token = generateToken(user.id, user.email);
 
-    res.json({
+    return res.json({
       message: 'Admin login successful',
       token,
       user: {
@@ -208,7 +208,7 @@ export async function adminLogin(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('Admin login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    return res.status(500).json({ error: 'Login failed' });
   }
 }
 
@@ -236,10 +236,10 @@ export async function requestPasswordReset(req: Request, res: Response) {
       otp
     );
 
-    res.json({ message: 'Password reset OTP sent to your email' });
+    return res.json({ message: 'Password reset OTP sent to your email' });
   } catch (error) {
     console.error('Password reset request error:', error);
-    res.status(500).json({ error: 'Request failed' });
+    return res.status(500).json({ error: 'Request failed' });
   }
 }
 
@@ -266,9 +266,9 @@ export async function resetPassword(req: Request, res: Response) {
 
     otpStore.delete(email);
 
-    res.json({ message: 'Password reset successful' });
+    return res.json({ message: 'Password reset successful' });
   } catch (error) {
     console.error('Password reset error:', error);
-    res.status(500).json({ error: 'Reset failed' });
+    return res.status(500).json({ error: 'Reset failed' });
   }
 }

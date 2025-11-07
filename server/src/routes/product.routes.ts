@@ -44,9 +44,9 @@ router.post(
       }
 
       const result = await uploadImage(req.file, 'products');
-      res.json({ message: 'Product image uploaded successfully', ...result });
+      return res.json({ message: 'Product image uploaded successfully', ...result });
     } catch (error) {
-      res.status(500).json({ error: 'Upload failed' });
+      return res.status(500).json({ error: 'Upload failed' });
     }
   }
 );

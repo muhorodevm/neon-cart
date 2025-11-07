@@ -97,13 +97,13 @@ export async function createOrder(req: AuthRequest, res: Response) {
       total
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Order created successfully",
       order,
     });
   } catch (error) {
     console.error("Create order error:", error);
-    res.status(500).json({ error: "Failed to create order" });
+    return res.status(500).json({ error: "Failed to create order" });
   }
 }
 
@@ -122,10 +122,10 @@ export async function getOrders(req: AuthRequest, res: Response) {
       orderBy: { createdAt: "desc" },
     });
 
-    res.json({ orders });
+    return res.json({ orders });
   } catch (error) {
     console.error("Get orders error:", error);
-    res.status(500).json({ error: "Failed to get orders" });
+    return res.status(500).json({ error: "Failed to get orders" });
   }
 }
 
@@ -153,10 +153,10 @@ export async function getOrderById(req: AuthRequest, res: Response) {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    res.json({ order });
+    return res.json({ order });
   } catch (error) {
     console.error("Get order error:", error);
-    res.status(500).json({ error: "Failed to get order" });
+    return res.status(500).json({ error: "Failed to get order" });
   }
 }
 
@@ -193,13 +193,13 @@ export async function updateOrderStatus(req: AuthRequest, res: Response) {
       await prisma.order.update({ where: { id }, data: { receiptUrl } });
     }
 
-    res.json({
+    return res.json({
       message: "Order status updated successfully",
       order,
     });
   } catch (error) {
     console.error("Update order status error:", error);
-    res.status(500).json({ error: "Failed to update order status" });
+    return res.status(500).json({ error: "Failed to update order status" });
   }
 }
 
@@ -241,9 +241,9 @@ export async function getAllOrders(req: AuthRequest, res: Response) {
       orderBy: { createdAt: "desc" },
     });
 
-    res.json({ orders });
+    return res.json({ orders });
   } catch (error) {
     console.error("Get all orders error:", error);
-    res.status(500).json({ error: "Failed to get orders" });
+    return res.status(500).json({ error: "Failed to get orders" });
   }
 }

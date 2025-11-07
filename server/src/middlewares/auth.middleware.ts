@@ -44,7 +44,7 @@ export const authenticate = async (
       roles: user.userRoles.map((ur) => ur.role),
     };
 
-    next();
+    return next();
   } catch (error) {
     return res.status(401).json({ error: 'Invalid token' });
   }
@@ -62,6 +62,6 @@ export const authorize = (...roles: string[]) => {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
-    next();
+    return next();
   };
 };
