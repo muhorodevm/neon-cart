@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(
   cors({
-    origin: "https://ndulakali.vercel.app" || "http://localhost:8080",
+    origin: "https://ndulakali.vercel.app",
     credentials: true,
   })
 );
